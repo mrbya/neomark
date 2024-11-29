@@ -13,26 +13,26 @@ function M.clear_checkboxes_rendering()
 end
 
 -- Render links in the buffer
-function M.render_links()
-    vim.api.nvim_buf_set_option(0, 'conceallevel', 0)
-    M.clear_links_rendering()
-
-    for i = 1, vim.api.nvim_buf_line_count(0) do
-        local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
-        if line then
-            local start, stop, text, link = line:find("%[(.+)%]%((.+)%)")
-            if start and stop then
-                vim.api.nvim_buf_set_option(0, 'conceallevel', 2)
-                vim.api.nvim_buf_set_extmark(0, M.links_ns_id, i - 1, start - 1, {
-                    virt_text = { { text } },
-                    virt_text_pos = "overlay",
-                    conceal = "␀",
-                    end_col = stop - 1,
-                })
-            end
-        end
-    end
-end
+-- function M.render_links()
+--     vim.api.nvim_buf_set_option(0, 'conceallevel', 0)
+--     M.clear_links_rendering()
+--
+--     for i = 1, vim.api.nvim_buf_line_count(0) do
+--         local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
+--         if line then
+--             local start, stop, text, link = line:find("%[(.+)%]%((.+)%)")
+--             if start and stop then
+--                 vim.api.nvim_buf_set_option(0, 'conceallevel', 2)
+--                 vim.api.nvim_buf_set_extmark(0, M.links_ns_id, i - 1, start - 1, {
+--                     virt_text = { { text } },
+--                     virt_text_pos = "overlay",
+--                     conceal = "␀",
+--                     end_col = stop - 1,
+--                 })
+--             end
+--         end
+--     end
+-- end
 
 function M.render_checkboxes()
     vim.api.nvim_buf_set_option(0, 'conceallevel', 0)
