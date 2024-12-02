@@ -3,6 +3,7 @@ local M = {}
 -- Tables to store buffer states
 M.buffers = {}
 M.current_buffer = {}
+M.current_element = {}
 
 -- Extmark elements for different makrdown elements
 M.elements = {
@@ -61,21 +62,27 @@ function M.get_next_interactable()
     local line = cursor[1] - 1
     local col = cursor[2]
 
+    local e = {}
+
     if elements[line] and elements[line] ~= {} then
         for _, element in ipairs(elements[line]) do
-            if col < element.start then
-                return { line, element }
+            if col < element.istart then
+                e = { line, element }
+                M.current_element = e
+                return e
             end
         end
     end
 
     ::wraparound::
 
-    for i = line + 1, vim.api.nvim_buf_line_count(0) do
+    for i = line + 1, vim.api.nvim_buf_line_count(0) - 1 do
         if elements[i] and elements[i] ~= {} then
             for _, element in ipairs(elements[i]) do
-                if element ~= nil and element ~= {} then
-                    return { i, element }
+                if element and element ~= {} then
+                    e = { line, element }
+                    M.current_element = e
+                    return e
                 end
             end
         end
@@ -96,16 +103,20 @@ function M.get_prev_interactable()
     local line = cursor[1] - 1
     local col = cursor[2]
 
+    local e = {}
+
     if elements[line] and elements[line] ~= {} then
         for _, element in ipairs(elements[line]) do
-            if col > element.stop then
-                return { line, element }
+            if col < element.istart then
+                e = { line, element }
+                M.current_element = e
+                return e
             end
         end
     end
 
     if line == 0 then
-        line = #elements
+        line = vim.api.nvim_buf_line_count(0) - 1
     else
         line = line - 1
     end
@@ -113,17 +124,43 @@ function M.get_prev_interactable()
     ::wraparound::
 
     for i = line, 0, -1 do
-        for j = #elements[i], 1, -1 do
-            if elements[j] and elements[j] ~= {} then
+        if elements[i] and elements ~= {} then
+            for j = #elements[i], 1, -1 do
                 if elements[i][j] and elements[i][j] ~= {} then
-                    return { line, elements[i][j] }
+                    e = { line, elements[i][j] }
+                    M.current_element = e
+                    return e
                 end
             end
         end
     end
 
-    line = #elements
+    line = vim.api.nvim_buf_line_count(0) - 1
     goto wraparound
+end
+
+function M.interact(element)
+    local type = element[2].type
+    local i = element[1]
+    local estart = element[2].start
+    local line = vim.api.nvim_buf_get_lines(0, i, i + 1, false)[1]
+    if type == 0 then
+        local start, stop, status = line:find("%[(.)%]", estart)
+        if start and stop then
+            if status == "x" then
+                status = " "
+            else
+                status = "x"
+            end
+
+            vim.api.nvim_buf_set_text(0, i, start - 1, i, stop, { '[' .. status .. ']' })
+        end
+    elseif type == 1 then
+        local start, stop, link = line:find("%[.-%]%((.-)%)", estart)
+        if start and stop then
+            print('Openning link: ' .. link)
+        end
+    end
 end
 
 M.renderers = {
@@ -286,21 +323,8 @@ function M.render_buf()
 end
 
 function M.interactables()
-    -- for i, line in pairs(M.buffers[M.current_buffer]) do
-    --     print("line " .. i .. ":")
-    --     for _, col in pairs(line) do
-    --         if col ~= nil or col ~= {} then
-    --             print("element " .. _ .. ': ' .. col.start .. ', ' .. col.stop)
-    --         end
-    --     end
-    -- end
-
     local e = M.get_next_interactable()
     vim.api.nvim_win_set_cursor(0, {e[1] + 1, e[2].istart})
-    -- for _, v in e do
-    --     print(v)
-    -- end
-    -- print(e)
 end
 
 -- Load neomark plugin
@@ -359,9 +383,11 @@ function M.load()
     vim.keymap.set('', '<Esc>', function()
         if vim.b.custom_mode then
             print(" ")
+        else
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, true, true), 'n', true)
         end
         vim.b.custom_mode = false
-    end)
+    end, { noremap = true, silent = true })
 
     vim.keymap.set('n', '<Right>', function()
         if vim.b.custom_mode then
@@ -380,6 +406,14 @@ function M.load()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Left>', true, true, true), 'n', true)
         end
     end, { noremap = true, silent = true })
+
+    vim.keymap.set('n', '<CR>', function()
+        if vim.b.custom_mode then
+            M.interact(M.current_element)
+        else
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, true, true), 'n', true)
+        end
+    end, {noremap = true, silent = true})
 end
 
 return M
