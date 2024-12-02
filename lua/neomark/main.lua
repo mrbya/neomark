@@ -66,6 +66,7 @@ function M.get_next_interactable()
 
     if elements[line] and elements[line] ~= {} then
         for _, element in ipairs(elements[line]) do
+            print('next ' .. line .. ': ' .. element.start .. ', ' .. element.stop .. ', ' .. element.type)
             if col < element.start then
                 e = { line, element }
                 M.current_element = e
@@ -109,6 +110,7 @@ function M.get_prev_interactable()
 
     if elements[line] and elements[line] ~= {} then
         for _, element in ipairs(elements[line]) do
+            print('prev ' .. line .. ': ' .. element.start .. ', ' .. element.stop .. ', ' .. element.type)
             if col > element.stop then
                 e = { line, element }
                 M.current_element = e
@@ -156,6 +158,7 @@ function M.get_closest_interactable()
 
     if elements[line] and elements[line] ~= {} then
         for _, element in ipairs(elements[line]) do
+            print('close ' .. line .. ': ' .. element.start .. ', ' .. element.stop .. ', ' .. element.type)
             if col > element.start and col < element.stop then
                 e = { line, element }
                 M.current_element = e
@@ -418,11 +421,11 @@ function M.load()
         local e = M.get_closest_interactable()
 
         if e then
-            print('Interactive mode')
+            vim.notify('Interactive mode', vim.log.levels.INFO)
             vim.b.custom_mode = true
             vim.api.nvim_win_set_cursor(0, {e[1] + 1, e[2].istart})
         else
-            print('No interactive elements!')
+            vim.notify('No interactive elements!', vim.log.levels.ERROR)
         end
     end)
 
