@@ -66,7 +66,7 @@ function M.get_next_interactable()
 
     if elements[line] and elements[line] ~= {} then
         for _, element in ipairs(elements[line]) do
-            if col < element.istart then
+            if col < element.start then
                 e = { line, element }
                 M.current_element = e
                 return e
@@ -74,13 +74,15 @@ function M.get_next_interactable()
         end
     end
 
+    line = line + 1
+
     ::wraparound::
 
-    for i = line + 1, vim.api.nvim_buf_line_count(0) - 1 do
+    for i = line, vim.api.nvim_buf_line_count(0) do
         if elements[i] and elements[i] ~= {} then
             for _, element in ipairs(elements[i]) do
                 if element and element ~= {} then
-                    e = { line, element }
+                    e = { i, element }
                     M.current_element = e
                     return e
                 end
@@ -107,7 +109,7 @@ function M.get_prev_interactable()
 
     if elements[line] and elements[line] ~= {} then
         for _, element in ipairs(elements[line]) do
-            if col < element.istart then
+            if col > element.stop then
                 e = { line, element }
                 M.current_element = e
                 return e
@@ -127,7 +129,7 @@ function M.get_prev_interactable()
         if elements[i] and elements ~= {} then
             for j = #elements[i], 1, -1 do
                 if elements[i][j] and elements[i][j] ~= {} then
-                    e = { line, elements[i][j] }
+                    e = { i, elements[i][j] }
                     M.current_element = e
                     return e
                 end
@@ -137,6 +139,38 @@ function M.get_prev_interactable()
 
     line = vim.api.nvim_buf_line_count(0) - 1
     goto wraparound
+end
+
+function M.get_closest_interactable()
+    local elements = M.get_elements_table()
+
+    if not elements or elements == {} then
+        return nil
+    end
+
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local line = cursor[1] - 1
+    local col = cursor[2]
+
+    local e = {}
+
+    if elements[line] and elements[line] ~= {} then
+        for _, element in ipairs(elements[line]) do
+            if col > element.start and col < element.stop then
+                e = { line, element }
+                M.current_element = e
+                return e
+            end
+        end
+
+        for _, element in ipairs(elements[line]) do
+            e = { line, element }
+            M.current_element = e
+            return e
+        end
+    end
+
+    return M.get_next_interactable()
 end
 
 function M.interact(element)
@@ -158,7 +192,13 @@ function M.interact(element)
     elseif type == 1 then
         local start, stop, link = line:find("%[.-%]%((.-)%)", estart)
         if start and stop then
-            print('Openning link: ' .. link)
+            local prefix = link:find("https?://")
+            if prefix then
+                print('linkiblinki')
+                vim.fn.system('xdg-open' .. vim.fn.shellescape(link))
+            else
+                vim.api.nvim_command('edit ' .. link)
+            end
         end
     end
 end
@@ -375,9 +415,15 @@ function M.load()
 
     vim.api.nvim_create_user_command("Interactables", M.interactables, {})
     vim.keymap.set('n', '<leader>l', function()
-        print('Interactive mode')
-        vim.b.custom_mode = true
-        M.interactables()
+        local e = M.get_closest_interactable()
+
+        if e then
+            print('Interactive mode')
+            vim.b.custom_mode = true
+            vim.api.nvim_win_set_cursor(0, {e[1] + 1, e[2].istart})
+        else
+            print('No interactive elements!')
+        end
     end)
 
     vim.keymap.set('', '<Esc>', function()
