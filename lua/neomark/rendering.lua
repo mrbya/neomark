@@ -16,8 +16,15 @@ R.element = {
     }
 }
 
-function R.create_interactable(line, start, stop, istart, len, type)
-    return { line = line, start = start, stop = stop, istart = istart, len = len, type = type }
+function R.create_interactable_element(line, start, stop, istart, len, type)
+    return {
+        line = line,
+        start = start,
+        stop = stop,
+        istart = istart,
+        len = len,
+        type = type
+    }
 end
 
 R.renderers = {
@@ -54,7 +61,14 @@ R.renderers = {
                 priority = 1,
             })
 
-            return R.create_interactable(i - 1, start, stop, start + preflen + 2, 1, R.element.types.checkbox)
+            return R.create_interactable_element(
+                i - 1,
+                start,
+                stop,
+                start + preflen + 2,
+                1,
+                R.element.types.checkbox
+            )
         end
     end,
 
@@ -64,7 +78,14 @@ R.renderers = {
             local start, stop, alt = line:find("%[(.[^%]]-)%]%(.-%)", search_start)
             if start and stop then
                 search_start = stop
-                return R.create_interactable(i - 1, start, stop, start, alt:len(), R.element.types.link)
+                return R.create_interactable_element(
+                    i - 1,
+                    start,
+                    stop,
+                    start,
+                    alt:len(),
+                    R.element.types.link
+                )
             end
         end
     end,
