@@ -11,8 +11,8 @@ R.elements = {
 R.element = {
     namespaces = {},
     types = {
-        checkbox = 0,
-        link = 1
+        checkbox = 'checkbox',
+        link = 'link'
     }
 }
 

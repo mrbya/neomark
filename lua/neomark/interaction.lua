@@ -6,6 +6,14 @@ function I.init()
     vim.b.interactive_mode = false
 end
 
+function I.set_interactive_mode(mode)
+    vim.b.interactive_mode = mode
+end
+
+function I.get_interactive_mode()
+    return vim.b.interactive_mode or false
+end
+
 function I.get_elements()
     return vim.b.elements
 end
