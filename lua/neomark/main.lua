@@ -1,34 +1,28 @@
 local M = {}
 
+local R = require('neomark.renderer')
+
 -- Tables to store buffer states
 M.buffers = {}
-M.current_buffer = {}
+M.current_buffer = 0
 M.current_element = {}
-
--- Extmark elements for different makrdown elements
-M.elements = {
-    'checkboxes',
-    'links',
-    'inline',
-    'h1',
-    'h2',
-}
 
 -- Create elements for all supported elements
 function M.create_namespaces()
-    for _, namespace in ipairs(M.elements) do
-        M.elements[namespace] = vim.api.nvim_create_namespace(namespace)
+    for _, namespace in ipairs(R.elements) do
+        R.element.namespaces[namespace] = vim.api.nvim_create_namespace(namespace)
     end
 end
 
+-- Get elements table for the current buffer
 function M.get_elements_table()
     return M.buffers[M.current_buffer]
 end
 
 -- Clear rendering of all namespaces
 function M.clear_rendering()
-    for _, namespace in ipairs(M.elements) do
-        vim.api.nvim_buf_clear_namespace(0, M.elements[namespace], 0, -1)
+    for _, namespace in ipairs(R.elements) do
+        vim.api.nvim_buf_clear_namespace(0, R.element.namespaces[namespace], 0, -1)
     end
 
     M.buffers[M.current_buffer] = {}
@@ -36,113 +30,23 @@ end
 
 -- Clear rendering elements of a single line
 function M.clear_line(line)
-    for _, namespace in ipairs(M.elements) do
-        local marks = vim.api.nvim_buf_get_extmarks(0, M.elements[namespace], { line, 0 }, { line, -1 }, {})
+    for _, namespace in ipairs(R.elements) do
+        local marks = vim.api.nvim_buf_get_extmarks(0, R.element.namespaces[namespace], { line, 0 }, { line, -1 }, {})
         if #marks > 0 then
             for _, mark in ipairs(marks) do
-                vim.api.nvim_buf_del_extmark(0, M.elements[namespace], mark[1])
+                vim.api.nvim_buf_del_extmark(0, R.element.namespaces[namespace], mark[1])
             end
         end
     end
 end
 
-function M.add_interactable(line, start, stop, istart, ilen, type)
-    M.buffers[M.current_buffer][line] = M.buffers[M.current_buffer][line] or {}
-    table.insert(M.buffers[M.current_buffer][line], {start = start, stop = stop, istart = istart, ilen = ilen, type = type})
+-- Add interactable element to the element table of the current buffer
+function M.add_interactable(element)
+    M.buffers[M.current_buffer] = M.buffers[M.current_buffer] or {}
+    table.insert(M.buffers[M.current_buffer], element)
 end
 
-function M.get_next_interactable()
-    local elements = M.get_elements_table()
-
-    if not elements or elements == {} then
-        return nil
-    end
-
-    local cursor = vim.api.nvim_win_get_cursor(0)
-    local line = cursor[1] - 1
-    local col = cursor[2]
-
-    local e = {}
-
-    if elements[line] and elements[line] ~= {} then
-        for _, element in ipairs(elements[line]) do
-            print('next ' .. line .. ': ' .. element.start .. ', ' .. element.stop .. ', ' .. element.type)
-            if col < element.start then
-                e = { line, element }
-                M.current_element = e
-                return e
-            end
-        end
-    end
-
-    line = line + 1
-
-    ::wraparound::
-
-    for i = line, vim.api.nvim_buf_line_count(0) do
-        if elements[i] and elements[i] ~= {} then
-            for _, element in ipairs(elements[i]) do
-                if element and element ~= {} then
-                    e = { i, element }
-                    M.current_element = e
-                    return e
-                end
-            end
-        end
-    end
-
-    line = 0
-    goto wraparound
-end
-
-function M.get_prev_interactable()
-    local elements = M.get_elements_table()
-
-    if not elements or elements == {} then
-        return nil
-    end
-
-    local cursor = vim.api.nvim_win_get_cursor(0)
-    local line = cursor[1] - 1
-    local col = cursor[2]
-
-    local e = {}
-
-    if elements[line] and elements[line] ~= {} then
-        for _, element in ipairs(elements[line]) do
-            print('prev ' .. line .. ': ' .. element.start .. ', ' .. element.stop .. ', ' .. element.type)
-            if col > element.stop then
-                e = { line, element }
-                M.current_element = e
-                return e
-            end
-        end
-    end
-
-    if line == 0 then
-        line = vim.api.nvim_buf_line_count(0) - 1
-    else
-        line = line - 1
-    end
-
-    ::wraparound::
-
-    for i = line, 0, -1 do
-        if elements[i] and elements ~= {} then
-            for j = #elements[i], 1, -1 do
-                if elements[i][j] and elements[i][j] ~= {} then
-                    e = { i, elements[i][j] }
-                    M.current_element = e
-                    return e
-                end
-            end
-        end
-    end
-
-    line = vim.api.nvim_buf_line_count(0) - 1
-    goto wraparound
-end
-
+-- Get the next interactable element closest to the cursor
 function M.get_closest_interactable()
     local elements = M.get_elements_table()
 
@@ -154,32 +58,62 @@ function M.get_closest_interactable()
     local line = cursor[1] - 1
     local col = cursor[2]
 
-    local e = {}
-
-    if elements[line] and elements[line] ~= {} then
-        for _, element in ipairs(elements[line]) do
-            print('close ' .. line .. ': ' .. element.start .. ', ' .. element.stop .. ', ' .. element.type)
-            if col > element.start and col < element.stop then
-                e = { line, element }
-                M.current_element = e
-                return e
-            end
-        end
-
-        for _, element in ipairs(elements[line]) do
-            e = { line, element }
-            M.current_element = e
-            return e
+    for i, element in ipairs(elements) do
+        if element.line >= line and (element.stop > col or element.start > col) then
+            M.current_element = i
+            return element
         end
     end
 
-    return M.get_next_interactable()
+    M.current_element = 1
+    return elements[1]
 end
 
+-- Return the next interactable element
+function M.get_next_interactable()
+    local elements = M.get_elements_table()
+
+    if not elements or elements == {} then
+        return nil
+    end
+
+    local i = M.current_element
+
+    if i < #elements then
+        M.current_element = i + 1
+        return elements[i + 1]
+    else
+        M.current_element = 1
+        return elements[1]
+    end
+end
+
+-- Raturn the previous interactable element
+function M.get_prev_interactable()
+    local elements = M.get_elements_table()
+
+    if not elements or elements == {} then
+        return nil
+    end
+
+    local i = M.current_element
+
+    if i > 1 then
+        M.current_element = i - 1
+        return elements[i - 1]
+    else
+        M.current_element = #elements
+        return elements[#elements]
+    end
+end
+
+-- Function to interact with an interactable element
 function M.interact(element)
-    local type = element[2].type
-    local i = element[1]
-    local estart = element[2].start
+    local elements = M.get_elements_table()
+    element = elements[element]
+    local type = element.type
+    local i = element.line
+    local estart = element.start
     local line = vim.api.nvim_buf_get_lines(0, i, i + 1, false)[1]
     if type == 0 then
         local start, stop, status = line:find("%[(.)%]", estart)
@@ -197,7 +131,6 @@ function M.interact(element)
         if start and stop then
             local prefix = link:find("https?://")
             if prefix then
-                print('linkiblinki')
                 vim.fn.system('xdg-open' .. vim.fn.shellescape(link))
             else
                 vim.api.nvim_command('edit ' .. link)
@@ -206,153 +139,15 @@ function M.interact(element)
     end
 end
 
-M.renderers = {
-    checkboxes = function(i, line)
-        local start, stop, prefix, status = line:find("-?(%d*%.?)%s%[(.)%]")
-        if start and stop then
-
-            local mark = ' '
-            local hl = ""
-            if status == 'x' then
-                mark = ''
-                hl = "String"
-            elseif status == '/' then
-                mark = ''
-                hl = "Tag"
-            elseif status == 'f' then
-                mark = ''
-                hl = "WarningMsg"
-            end
-
-            local preflen = 0
-            if prefix ~= nil and prefix ~= "" then
-                preflen = string.len(prefix) - 1
-                prefix = prefix .. ' '
-            else
-                prefix = '  '
-            end
-
-            vim.api.nvim_buf_set_extmark(0, M.elements['checkboxes'], i - 1, start - 1, {
-                virt_text = { { prefix .. '[', "WarningMsg" }, { mark, hl }, { ']', "WarningMsg" } },
-                virt_text_pos = "overlay",
-                conceal = "␀",
-                end_col = stop - 5 - preflen,
-                priority = 1,
-            })
-
-            M.add_interactable(i - 1, start, stop, start + preflen + 2, 1, 0)
-        end
-    end,
-
-    links = function(i, line)
-        local search_start = 0
-        for _ in line:gmatch("%[(.-)%]%(.-%)") do
-            local start, stop, alt = line:find("%[(.-)%]%(.-%)", search_start)
-            if start and stop then
-                search_start = stop
-
-                -- vim.api.nvim_buf_set_extmark(0, M.elements['links'], i - 1, start - 1, {
-                --     virt_text = { { '[', "WarningMsg" }, { alt, "Special" }, { ']\0 ', "WarningMsg" } },
-                --     virt_text_pos = 'overlay',
-                --     hl_mode = 'combine',
-                --     conceal = " ",
-                --     end_col = concealed_offset,
-                --     priority = 1
-                -- })
-
-                M.add_interactable(i - 1, start, stop, start, alt:len(), 1)
-            end
-        end
-    end,
-
-    inline = function(i, line)
-        local search_start = 0
-        for _ in line:gmatch("%*%*.-%*%*") do
-            local start, stop, text = line:find("%*%*(.-)%*%*", search_start)
-            if start and stop then
-                search_start = stop
-                vim.api.nvim_buf_set_extmark(0, M.elements['inline'], i - 1, start - 1, {
-                    virt_text = { { text, 'Bold' }, {'\0'} },
-                    virt_text_pos = 'overlay',
-                    hl_mode = 'combine',
-                    conceal = '␀',
-                    end_col = stop - 1,
-                    priority = 2,
-                })
-                line = line:gsub("%*%*", "␀␀", 2)
-            end
-        end
-
-        search_start = 0
-        for _ in line:gmatch("%*.-%*") do
-            local start, stop, text = line:find("%*(.-)%*", search_start)
-            if start and stop then
-                search_start = stop
-                text = text:gsub("␀", "")
-                vim.api.nvim_buf_set_extmark(0, M.elements['inline'], i - 1, start - 1, {
-                    virt_text = { { text, 'Italic' }, {'\0'} },
-                    virt_text_pos = 'overlay',
-                    hl_mode = 'combine',
-                    conceal = '␀',
-                    end_col = stop - 1,
-                    priority = 2,
-                })
-                line = line:gsub("%*", "␀", 2)
-            end
-        end
-
-        search_start = 0
-        for _ in line:gmatch("~.-~") do
-            local start, stop, text = line:find("~(.-)~", search_start)
-            if start and stop then
-                search_start = stop
-                text = text:gsub("␀", "")
-                vim.api.nvim_buf_set_extmark(0, M.elements['inline'], i - 1, start - 1, {
-                    virt_text = { { text, '@markup.strikethrough' }, {'\0'} },
-                    virt_text_pos = 'overlay',
-                    hl_mode = 'combine',
-                    conceal = '␀',
-                    end_col = stop - 2,
-                    priority = 1,
-                })
-                line = line:gsub("%*", "␀", 2)
-            end
-        end
-    end,
-
-    h1 = function(i, line)
-        local start, stop, text = line:find("^%s*#%s(.+)")
-        if start and stop then
-            vim.api.nvim_buf_set_extmark(0, M.elements['h1'], i - 1, start - 1, {
-                virt_text = { { '# ' .. text .. ' #', 'St_NormalMode' } },
-                virt_text_pos = 'overlay',
-                conceal = '␀',
-                end_col = stop,
-                priority = 1,
-            })
-        end
-    end,
-
-    h2 = function(i, line)
-        local start, stop, text = line:find("^%s*##%s(.+)")
-        if start and stop then
-            vim.api.nvim_buf_set_extmark(0, M.elements['h2'], i - 1, start - 1, {
-                virt_text = { { '## ' .. text .. ' ##', 'Title' } },
-                virt_text_pos = 'overlay',
-                conceal = '␀',
-                end_col = stop,
-                priority = 1,
-            })
-        end
-    end
-}
-
 -- Render supported elements in a single line
 function M.render_line(i)
     local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
     if line then
-        for _, renderer in ipairs(M.elements) do
-            M.renderers[renderer](i, line)
+        for _, renderer in ipairs(R.elements) do
+            local ie = R.renderers[renderer](i, line)
+            if ie then
+                M.add_interactable(ie)
+            end
         end
     end
 end
@@ -366,8 +161,35 @@ function M.render_buf()
 end
 
 function M.interactables()
-    local e = M.get_next_interactable()
-    vim.api.nvim_win_set_cursor(0, {e[1] + 1, e[2].istart})
+    local elements = M.get_elements_table()
+    for i, element in ipairs(elements) do
+        print(i .. ": " .. element.line .. ', ' .. element.start .. ', ' .. element.stop .. ', ' .. element.istart .. ', ' .. element.len .. ', ' .. element.type)
+    end
+end
+
+function M.buffer_init()
+    M.current_buffer = vim.api.nvim_get_current_buf()
+    M.buffers[M.current_buffer] = M.buffers[M.current_buffer] or {}
+    vim.b.interactive_mode = vim.b.interactive_mode or false
+end
+
+function M.re_render()
+    local line = vim.api.nvim_win_get_cursor(0)[1] - 1
+    M.clear_rendering()
+    M.render_buf()
+    M.clear_line(line)
+end
+
+function M.render()
+    vim.api.nvim_set_option_value('conceallevel', 0, { scope = 'local' })
+    M.clear_rendering()
+    M.render_buf()
+    vim.api.nvim_set_option_value('conceallevel', 2, { scope = 'local' })
+end
+
+function M.clear()
+    vim.api.nvim_set_option_value('conceallevel', 0, { scope = 'local' })
+    M.clear_rendering()
 end
 
 -- Load neomark plugin
@@ -378,20 +200,14 @@ function M.load()
     vim.api.nvim_create_autocmd({ "BufEnter" }, {
         pattern = "*.md",
         callback = function()
-            M.current_buffer = vim.api.nvim_get_current_buf()
-            M.buffers[M.current_buffer] = M.buffers[M.current_buffer] or {}
-            vim.b.custom_mode = false
+            M.buffer_init()
         end
     })
 
     vim.api.nvim_create_autocmd({ "CursorMoved" }, {
         pattern = "*.md",
         callback = function()
-            local line = vim.api.nvim_win_get_cursor(0)[1]
-            line = line - 1
-            M.clear_rendering()
-            M.render_buf()
-            M.clear_line(line)
+            M.re_render()
         end
     })
 
@@ -400,9 +216,7 @@ function M.load()
         pattern = "*.md",
         callback = function()
             if vim.fn.mode() == "n" or vim.fn.mode() == "v" then
-                vim.api.nvim_set_option_value('conceallevel', 0, { scope = 'local' })
-                M.render_buf()
-                vim.api.nvim_set_option_value('conceallevel', 2, { scope = 'local' })
+                M.render()
             end
         end,
     })
@@ -411,19 +225,19 @@ function M.load()
     vim.api.nvim_create_autocmd({ "InsertEnter" }, {
         pattern = "*.md",
         callback = function()
-            vim.api.nvim_set_option_value('conceallevel', 0, { scope = 'local' })
-            M.clear_rendering()
+            M.clear()
         end,
     })
 
     vim.api.nvim_create_user_command("Interactables", M.interactables, {})
-    vim.keymap.set('n', '<leader>l', function()
+
+    vim.keymap.set('n', 'l', function()
         local e = M.get_closest_interactable()
 
-        if e then
+        if e and e ~= {} then
             vim.notify('Interactive mode', vim.log.levels.INFO)
             vim.b.custom_mode = true
-            vim.api.nvim_win_set_cursor(0, {e[1] + 1, e[2].istart})
+            vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
         else
             vim.notify('No interactive elements!', vim.log.levels.ERROR)
         end
@@ -441,7 +255,9 @@ function M.load()
     vim.keymap.set('n', '<Right>', function()
         if vim.b.custom_mode then
             local e = M.get_next_interactable()
-            vim.api.nvim_win_set_cursor(0, {e[1] + 1, e[2].istart})
+            if e then
+                vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
+            end
         else
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Right>', true, true, true), 'n', true)
         end
@@ -450,7 +266,9 @@ function M.load()
     vim.keymap.set('n', '<Left>', function()
         if vim.b.custom_mode then
             local e = M.get_prev_interactable()
-            vim.api.nvim_win_set_cursor(0, {e[1] + 1, e[2].istart})
+            if e then
+                vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
+            end
         else
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Left>', true, true, true), 'n', true)
         end
