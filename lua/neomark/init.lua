@@ -1,9 +1,8 @@
 local neomark = {}
-
-local main = require("neomark.main")
+neomark.api = require("neomark.main")
 
 function neomark.setup(opts)
-    main.load()
+    neomark.api.load()
 end
 
 return neomark

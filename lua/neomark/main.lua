@@ -1,6 +1,7 @@
 local M = {}
 
-local R = require('neomark.renderer')
+M.rendering = require('neomark.rendering')
+M.interactive_mode = require('neomark.interactive_mode')
 
 -- Tables to store buffer states
 M.buffers = {}
@@ -9,8 +10,8 @@ M.current_element = {}
 
 -- Create elements for all supported elements
 function M.create_namespaces()
-    for _, namespace in ipairs(R.elements) do
-        R.element.namespaces[namespace] = vim.api.nvim_create_namespace(namespace)
+    for _, namespace in ipairs(M.rendering.elements) do
+        M.rendering.element.namespaces[namespace] = vim.api.nvim_create_namespace(namespace)
     end
 end
 
@@ -21,8 +22,8 @@ end
 
 -- Clear rendering of all namespaces
 function M.clear_rendering()
-    for _, namespace in ipairs(R.elements) do
-        vim.api.nvim_buf_clear_namespace(0, R.element.namespaces[namespace], 0, -1)
+    for _, namespace in ipairs(M.rendering.elements) do
+        vim.api.nvim_buf_clear_namespace(0, M.rendering.element.namespaces[namespace], 0, -1)
     end
 
     M.buffers[M.current_buffer] = {}
@@ -30,11 +31,11 @@ end
 
 -- Clear rendering elements of a single line
 function M.clear_line(line)
-    for _, namespace in ipairs(R.elements) do
-        local marks = vim.api.nvim_buf_get_extmarks(0, R.element.namespaces[namespace], { line, 0 }, { line, -1 }, {})
+    for _, namespace in ipairs(M.rendering.elements) do
+        local marks = vim.api.nvim_buf_get_extmarks(0, M.rendering.element.namespaces[namespace], { line, 0 }, { line, -1 }, {})
         if #marks > 0 then
             for _, mark in ipairs(marks) do
-                vim.api.nvim_buf_del_extmark(0, R.element.namespaces[namespace], mark[1])
+                vim.api.nvim_buf_del_extmark(0, M.rendering.element.namespaces[namespace], mark[1])
             end
         end
     end
@@ -143,8 +144,8 @@ end
 function M.render_line(i)
     local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
     if line then
-        for _, renderer in ipairs(R.elements) do
-            local ie = R.renderers[renderer](i, line)
+        for _, renderer in ipairs(M.rendering.elements) do
+            local ie = M.rendering.renderers[renderer](i, line)
             if ie then
                 M.add_interactable(ie)
             end
@@ -192,6 +193,53 @@ function M.clear()
     M.clear_rendering()
 end
 
+function M.interactive_mode_enter()
+    local e = M.get_closest_interactable()
+
+    if e and e ~= {} then
+        vim.notify('Interactive mode', vim.log.levels.INFO)
+        vim.b.interactive_mode = true
+        vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
+    else
+        vim.notify('No interactive elements!', vim.log.levels.ERROR)
+    end
+end
+
+function M.interactive_mode_exit()
+    if vim.b.interactive_mode then
+        print(" ")
+    else
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, true, true), 'n', true)
+    end
+    vim.b.interactive_mode = false
+end
+
+M.interactive_mode = {
+    callbacks = {
+        next = M.get_next_interactable,
+        previous = M.get_prev_interactable
+    }
+}
+
+function M.interactive_mode_move(direction, accelerator)
+    if vim.b.interactive_mode then
+        local e = M.interactive_mode.callbacks[direction]()
+        if e then
+            vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
+        end
+    else
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(accelerator, true, true, true), 'n', true)
+    end
+end
+
+function M.interactive_mode_interact(accelerator)
+    if vim.b.interactive_mode then
+        M.interact(M.current_element)
+    else
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(accelerator, true, true, true), 'n', true)
+    end
+end
+
 -- Load neomark plugin
 function M.load()
     vim.api.nvim_clear_autocmds({pattern = "*.md"})
@@ -232,54 +280,23 @@ function M.load()
     vim.api.nvim_create_user_command("Interactables", M.interactables, {})
 
     vim.keymap.set('n', 'l', function()
-        local e = M.get_closest_interactable()
-
-        if e and e ~= {} then
-            vim.notify('Interactive mode', vim.log.levels.INFO)
-            vim.b.custom_mode = true
-            vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
-        else
-            vim.notify('No interactive elements!', vim.log.levels.ERROR)
-        end
+        M.interactive_mode_enter()
     end)
 
     vim.keymap.set('', '<Esc>', function()
-        if vim.b.custom_mode then
-            print(" ")
-        else
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, true, true), 'n', true)
-        end
-        vim.b.custom_mode = false
+        M.interactive_mode_exit()
     end, { noremap = true, silent = true })
 
     vim.keymap.set('n', '<Right>', function()
-        if vim.b.custom_mode then
-            local e = M.get_next_interactable()
-            if e then
-                vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
-            end
-        else
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Right>', true, true, true), 'n', true)
-        end
+        M.interactive_mode_move('next', '<Right>')
     end, { noremap = true, silent = true })
 
     vim.keymap.set('n', '<Left>', function()
-        if vim.b.custom_mode then
-            local e = M.get_prev_interactable()
-            if e then
-                vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
-            end
-        else
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Left>', true, true, true), 'n', true)
-        end
+        M.interactive_mode_move('previous', '<Left>')
     end, { noremap = true, silent = true })
 
     vim.keymap.set('n', '<CR>', function()
-        if vim.b.custom_mode then
-            M.interact(M.current_element)
-        else
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, true, true), 'n', true)
-        end
+        M.interactive_mode_interact('<CR>')
     end, {noremap = true, silent = true})
 end
 
