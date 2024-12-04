@@ -1,5 +1,12 @@
+--- @module "neomark.api.rendering"
+---
+--- Neomark API submodule providing supported markdown element rendering.
+---
 local R = {}
 
+--- @enum neomark.api.rendering.supported
+---
+--- Supported markdown eleennts.
 R.supported = {
     'checkbox',
     'link',
@@ -8,15 +15,31 @@ R.supported = {
     'h2',
 }
 
+--- @class neomark.api.rendering.config
+---
+--- Table to hold rendering api config.
 R.config = {}
+
+--- @class neomark.api.rendering.namespaces
+---
+--- Table to hold namespace ids.
 R.namespaces = {}
+
+--- @class neomark.api.rendering.element
+---
+--- Table providing element types and renderers.
 R.element = {
+    --- @enum neomark.api.rendering.element.types
     types = {
         checkbox = 'checkbox',
         link = 'link'
     },
 }
 
+--- Neomark API rendering submodule initialization function.
+---
+--- @param config neomark.api.config Neomark config.
+---
 function R.init(config)
     local disable = {}
 
@@ -36,16 +59,27 @@ function R.init(config)
     end
 end
 
+--- Retrieve namespace id.
+---
+--- @param namespace string Namespace
+---
+--- @return integer Namespace id
+---
 function R.get_namespace_id(namespace)
     return R.namespaces[namespace]
 end
 
+--- Clear rendering of the active buffer.
 function R.clear()
     for _, id in pairs(R.namespaces) do
         vim.api.nvim_buf_clear_namespace(0, id, 0, -1)
     end
 end
 
+--- Clear rendering of a specific line of the buffer.
+---
+--- @param line integer Line index.
+---
 function R.clear_line(line)
     for _, id in pairs(R.namespaces) do
         local marks = vim.api.nvim_buf_get_extmarks(0, id, { line, 0 }, { line, -1 }, {})
@@ -57,6 +91,13 @@ function R.clear_line(line)
     end
 end
 
+--- Construct interactive element table.
+---
+--- @param line integer Line index
+--- @param start integer Element start column
+--- @param stop integer Element stop column
+--- @param istart integer Element interactive section start column
+--- @param type neomark.api.rendering.element.types Interactive element type
 function R.create_interactive_element(line, start, stop, istart, len, type)
     return {
         line = line,
@@ -68,6 +109,7 @@ function R.create_interactive_element(line, start, stop, istart, len, type)
     }
 end
 
+--- @enum naomark.api.rendering.element.renderers
 R.element.renderers = {
     checkbox = function(i, line)
         local start, stop, prefix, status = line:find('-?(%d*%.?)%s%[(.)%]')
@@ -213,6 +255,10 @@ R.element.renderers = {
     end
 }
 
+--- Render a specific line of the active buffer.
+---
+--- @param line_idx integer Line index
+--- @param line string Line contents
 function R.render_line(line_idx, line)
     local interactive_elements = {}
     for _, renderer in ipairs(R.config) do
