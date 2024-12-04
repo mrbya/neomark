@@ -26,7 +26,7 @@ function I.get_elements()
     return I.state.elements[I.state.current_buffer]
 end
 
-function I.clear_elements()
+function I.clear()
     I.state.elements[I.state.current_buffer] = {}
 end
 
@@ -103,7 +103,7 @@ end
 
 I.interact_callbacks = {
     checkbox = function(line_idx, estart, line)
-        local start, stop, status = line:find("%[(.)%]", estart)
+        local start, stop, status = line:find('%[(.)%]', estart)
         if start and stop then
             if status == 'x' then
                 status = ' '
@@ -116,9 +116,9 @@ I.interact_callbacks = {
     end,
 
     link = function(_, estart, line)
-        local start, stop, link = line:find("%[.-%]%((.-)%)", estart)
+        local start, stop, link = line:find('%[.-%]%((.-)%)', estart)
         if start and stop then
-            local prefix = link:find("https?:%/%/")
+            local prefix = link:find('https?:%/%/')
             if prefix then
                 vim.fn.system('xdg-open ' .. vim.fn.shellescape(link))
             else
@@ -167,7 +167,7 @@ end
 
 function I.exit()
     if I.get_interactive_mode() then
-        print(" ")
+        print(' ')
     else
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, true, true), 'n', true)
     end
