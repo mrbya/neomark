@@ -1,4 +1,4 @@
---- @module "neomark.api.lib.interactive"
+--- @module "neomark.api.interactive"
 ---
 --- Neomark API submodule providing features to interact with markdown
 --- elements such as checkboxes and links.

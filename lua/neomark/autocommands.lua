@@ -1,10 +1,10 @@
---- @module "neomark.api.autocommands"
+--- @module "neomark.autocommands"
 ---
 --- Neomark API module holding its autocommands.
 ---
 local A = {}
 
-local api = require('neomark.api.api')
+local api = require('neomark.api')
 
 --- Function to load autocommands.
 ---

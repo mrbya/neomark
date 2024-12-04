@@ -1,10 +1,10 @@
---- @module "neomark.api.keymaps"
+--- @module "neomark.keymaps"
 ---
 --- Neomark API keymaps module
 ---
 local K = {}
 
-local api = require('neomark.api.api')
+local api = require('neomark.api')
 
 --- Load Neomark keymaps
 ---

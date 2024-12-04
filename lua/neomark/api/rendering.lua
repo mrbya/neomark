@@ -98,6 +98,9 @@ end
 --- @param stop integer Element stop column
 --- @param istart integer Element interactive section start column
 --- @param type neomark.api.rendering.element.types Interactive element type
+---
+--- @return neomark.api.element Constructed nteractive element
+---
 function R.create_interactive_element(line, start, stop, istart, len, type)
     return {
         line = line,

@@ -5,8 +5,8 @@
 ---
 local M = {}
 
-M.rendering   = require('neomark.api.lib.rendering')
-M.interactive = require('neomark.api.lib.interactive')
+M.rendering   = require('neomark.api.rendering')
+M.interactive = require('neomark.api.interactive')
 
 --- @class neomark.api.element
 ---
