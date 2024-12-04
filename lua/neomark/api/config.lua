@@ -1,0 +1,24 @@
+--- @class neomark.api.config
+---
+--- Configuration table for Naomark API.
+---
+--- @field disable table Table containing disabled elements
+--- @field filetypes table Table setting file patterns to use Neomark with
+--- @field keymaps table Table containing interactive mode keymaps
+local config = {
+    disable = {},
+
+    filetypes = { '*.md' },
+
+    --- @enum neomark.api.config.keymaps
+    ---
+    --- Command keymaps
+    keymaps = {
+        interactive_mode = '<leader>i',
+        forward = '<Right>',
+        backward = '<Left>',
+        interact = '<CR>'
+    },
+}
+
+return config
