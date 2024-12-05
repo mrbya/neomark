@@ -230,7 +230,7 @@ I.movement = {
         'backward',
     },
 
-    --- @class neomark.api.interactive.movement.callbacks
+    --- @type table<string, function>
     ---
     --- Cursor movement callbacks
     callbacks = {

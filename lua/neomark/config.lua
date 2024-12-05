@@ -1,6 +1,6 @@
 --- @module "neomark.config"
 
---- @class neomark.api.config
+--- @class neomark.config
 ---
 --- Configuration table for Naomark API.
 ---

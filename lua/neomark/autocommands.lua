@@ -8,7 +8,7 @@ local api = require('neomark.api')
 
 --- Function to load autocommands.
 ---
---- @param config neomark.api.config
+--- @param config neomark.config
 function A.load(config)
     vim.api.nvim_create_autocmd({ 'BufEnter' }, {
         pattern = config.filetypes,

@@ -1,12 +1,12 @@
 --- @module "neomark.api"
 ---
 --- Base file for neomark api.
---- Contains the top-level implementation of neomarks api.
+--- Contains the top-level implementation of neomark api.
 ---
-local M = {}
-
-M.rendering   = require('neomark.api.rendering')
-M.interactive = require('neomark.api.interactive')
+local M = {
+    rendering   = require('neomark.api.rendering'),
+    interactive = require('neomark.api.interactive')
+}
 
 --- @class neomark.api.element
 ---
@@ -22,7 +22,7 @@ M.interactive = require('neomark.api.interactive')
 
 --- Api initialisation function.
 ---
---- @param config neomark.api.config Neomarks config table
+--- @param config neomark.config Neomarks config table
 ---
 function M.init(config)
     M.rendering.init(config)

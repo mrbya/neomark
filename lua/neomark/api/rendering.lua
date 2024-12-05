@@ -38,7 +38,7 @@ R.element = {
 
 --- Neomark API rendering submodule initialization function.
 ---
---- @param config neomark.api.config Neomark config.
+--- @param config neomark.config Neomark config.
 ---
 function R.init(config)
     local disable = {}
@@ -112,7 +112,7 @@ function R.create_interactive_element(line, start, stop, istart, len, type)
     }
 end
 
---- @enum naomark.api.rendering.element.renderers
+--- @type table<string, function>
 R.element.renderers = {
     checkbox = function(i, line)
         local start, stop, prefix, status = line:find('-?(%d*%.?)%s%[(.)%]')
@@ -262,6 +262,8 @@ R.element.renderers = {
 ---
 --- @param line_idx integer Line index
 --- @param line string Line contents
+---
+--- @return table Array of rendered interactive elements
 function R.render_line(line_idx, line)
     local interactive_elements = {}
     for _, renderer in ipairs(R.config) do

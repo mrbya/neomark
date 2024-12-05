@@ -11,7 +11,7 @@ local neomark = {
 
 --- Parse user config and load Neomark API
 ---
---- @param opts neomark.api.config User config
+--- @param opts neomark.config User config
 ---
 function neomark.setup(opts)
     neomark.config = vim.tbl_deep_extend('force', neomark.config, opts or {})

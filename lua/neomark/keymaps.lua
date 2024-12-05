@@ -8,7 +8,7 @@ local api = require('neomark.api')
 
 --- Load Neomark keymaps
 ---
---- @param config neomark.api.config
+--- @param config neomark.config
 function K.load(config)
     local keymaps = config.keymaps
 
