@@ -40,7 +40,8 @@ So far tested only with [lazy.nvim](https://github.com/folke/lazy.nvim)
     filetypes = { '*.md' },
 
     keymaps = {
-        interactive_mode = '<leader>i',
+        interactive_mode_enter = '<leader>i',
+        interactive_mode_exit = '<Esc>',
         forward = '<Right>',
         backward = '<Left>',
         up = '<Up>',
@@ -79,13 +80,26 @@ opts = {
 }
 ```
 
-## Usage
+## Usage (keymaps)
 
 1. Rendering starts on opening a markdown file in a buffer.
 2. Use `<leader>i` to enter interactive mode:
     - Use arrow keys to navigate between interactive elements
     - Use `<CR>` to interact with an element
-3. Profit
+
+## Usage (commands)
+
+Same features can be acccessed using commands:
+
+| Action | Command |
+| ------------- | -------------- |
+| Enter interactive mode | `nmie` |
+| Exit interactive mode | `nmix` |
+| Navigate forward | `nmif` |
+| Navigate backward | `nmib` |
+| Navigate up | `nmiu` |
+| Navigate down | `nmid` |
+| Interact | `mnii` |
 
 ## Upcomming features
 
