@@ -7,6 +7,7 @@
 --- @field disable table Table containing disabled elements
 --- @field filetypes table Table setting file patterns to use Neomark with
 --- @field keymaps table Table containing interactive mode keymaps
+---
 local config = {
     disable = {},
 
