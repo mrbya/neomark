@@ -19,6 +19,8 @@ local config = {
         interactive_mode = '<leader>i',
         forward = '<Right>',
         backward = '<Left>',
+        up = '<Up>',
+        down = '<Down>',
         interact = '<CR>'
     },
 }

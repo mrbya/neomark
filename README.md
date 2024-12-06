@@ -43,6 +43,8 @@ So far tested only with [lazy.nvim](https://github.com/folke/lazy.nvim)
         interactive_mode = '<leader>i',
         forward = '<Right>',
         backward = '<Left>',
+        up = '<Up>',
+        Down = '<Down>'
         interact = '<CR>',
     },
 }

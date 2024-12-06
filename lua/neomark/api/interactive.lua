@@ -31,7 +31,6 @@ function I.init()
     I.state.interactive_mode[I.state.current_buffer] = I.state.interactive_mode[I.state.current_buffer] or false
 end
 
-
 --- Set interactive mode for the current buffer.
 ---
 --- @param mode boolean Interactive mode setting.
@@ -156,6 +155,84 @@ function I.get_previous_element()
     end
 end
 
+--- Find and return the 1st element on the closest
+--- next line containing interactive elements.
+---
+--- @return neomark.api.element | nil Found element
+---
+function I.get_next_line_element()
+    local elements = I.get_elements()
+
+    if not elements or elements == {} then
+        return nil
+    end
+
+    local idx = I.get_current_element_idx()
+    local line = elements[idx].line
+
+    for i = idx, #elements do
+        if elements[i] and elements[i].line ~= line then
+            I.set_current_element_idx(i)
+            return elements[i]
+        end
+    end
+
+    for i = 1, idx do
+        if elements[i] and elements[i].line ~= line then
+            I.set_current_element_idx(i)
+            return elements[i]
+        end
+    end
+
+    return nil
+end
+
+--- Find and return the 1st element on the closest
+--- previous line containing interactive elements.
+---
+--- @return neomark.api.element | nil Found element
+---
+function I.get_previous_line_element()
+    local elements = I.get_elements()
+
+    if not elements or elements == {} then
+        return nil
+    end
+
+    local idx = I.get_current_element_idx()
+    local line = elements[idx].line
+
+    for i = idx, 0, -1 do
+        if elements[i] and elements[i].line ~= line then
+            line = elements[i].line
+            for j = i, 1, -1 do
+                if elements[j] and elements[j].line ~= line then
+                    I.set_current_element_idx(j + 1)
+                    return elements[j + 1]
+                end
+            end
+            I.set_current_element_idx(i)
+            return elements[i]
+        end
+    end
+
+    for i = #elements, idx, -1 do
+        if elements[i] and elements[i].line ~= line then
+            line = elements[i].line
+            for j = i, 1, -1 do
+                if elements[j] and elements[j].line ~= line then
+                    I.set_current_element_idx(j + 1)
+                    return elements[j + 1]
+                end
+            end
+            I.set_current_element_idx(i)
+            return elements[i]
+        end
+    end
+
+    return nil
+end
+
 --- @class neomark.api.interactive.interact_callbacks
 ---
 --- Table of element interaction callbacks.
@@ -228,6 +305,8 @@ I.movement = {
     directions = {
         'forward',
         'backward',
+        'up',
+        'down',
     },
 
     --- @type table<string, function>
@@ -236,6 +315,8 @@ I.movement = {
     callbacks = {
         forward = I.get_next_element,
         backward = I.get_previous_element,
+        up = I.get_previous_line_element,
+        down = I.get_next_line_element,
     }
 }
 
