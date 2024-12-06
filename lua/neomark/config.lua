@@ -2,25 +2,28 @@
 
 --- @class neomark.config
 ---
---- Configuration table for Naomark API.
+--- Configuration table for Neomark API
 ---
 --- @field disable table Table containing disabled elements
 --- @field filetypes table Table setting file patterns to use Neomark with
 --- @field keymaps table Table containing interactive mode keymaps
 ---
 local config = {
-    --- @table neomark.api.rendering.supported
+    --- @type table<neomark.api.rendering.supported>
     ---
-    --- Table containing settings to disable specific element rendering
+    --- Array containing disabled supported elements
+    ---
     disable = {},
 
     filetypes = { '*.md' },
 
-    --- @enum neomark.api.config.keymaps
+    --- @enum neomark.config.keymap
     ---
     --- Command keymaps
+    ---
     keymaps = {
-        interactive_mode = '<leader>i',
+        interactive_mode_enter = '<leader>i',
+        interactive_mode_exit = '<Esc>',
         forward = '<Right>',
         backward = '<Left>',
         up = '<Up>',

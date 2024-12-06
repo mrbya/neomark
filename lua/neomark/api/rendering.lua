@@ -1,12 +1,13 @@
 --- @module "neomark.api.rendering"
 ---
---- Neomark API submodule providing supported markdown element rendering.
+--- Neomark API submodule providing supported markdown element rendering
 ---
 local R = {}
 
 --- @enum neomark.api.rendering.supported
 ---
 --- Supported markdown eleennts.
+---
 R.supported = {
     'checkbox',
     'link',
@@ -17,17 +18,20 @@ R.supported = {
 
 --- @class neomark.api.rendering.config
 ---
---- Table to hold rendering api config.
+--- Table to hold rendering api config
+---
 R.config = {}
 
 --- @class neomark.api.rendering.namespaces
 ---
---- Table to hold namespace ids.
+--- Table to hold namespace ids
+---
 R.namespaces = {}
 
 --- @class neomark.api.rendering.element
 ---
---- Table providing element types and renderers.
+--- Table providing element types and renderers
+---
 R.element = {
     --- @enum neomark.api.rendering.element.types
     types = {
@@ -38,7 +42,7 @@ R.element = {
 
 --- Neomark API rendering submodule initialization function.
 ---
---- @param config neomark.config Neomark config.
+--- @param config neomark.config Neomark config
 ---
 function R.init(config)
     local disable = {}
@@ -59,7 +63,7 @@ function R.init(config)
     end
 end
 
---- Retrieve namespace id.
+--- Retrieve namespace id
 ---
 --- @param namespace string Namespace
 ---
@@ -69,14 +73,14 @@ function R.get_namespace_id(namespace)
     return R.namespaces[namespace]
 end
 
---- Clear rendering of the active buffer.
+--- Clear rendering of the active buffer
 function R.clear()
     for _, id in pairs(R.namespaces) do
         vim.api.nvim_buf_clear_namespace(0, id, 0, -1)
     end
 end
 
---- Clear rendering of a specific line of the buffer.
+--- Clear rendering of a specific line of the buffer
 ---
 --- @param line integer Line index.
 ---
@@ -91,7 +95,7 @@ function R.clear_line(line)
     end
 end
 
---- Construct interactive element table.
+--- Construct interactive element table
 ---
 --- @param line integer Line index
 --- @param start integer Element start column
@@ -113,6 +117,9 @@ function R.create_interactive_element(line, start, stop, istart, len, type)
 end
 
 --- @type table<string, function>
+---
+--- Supported element renderrers
+---
 R.element.renderers = {
     checkbox = function(i, line)
         local start, stop, prefix, status = line:find('-?(%d*%.?)%s%[(.)%]')
@@ -264,6 +271,7 @@ R.element.renderers = {
 --- @param line string Line contents
 ---
 --- @return table Array of rendered interactive elements
+---
 function R.render_line(line_idx, line)
     local interactive_elements = {}
     for _, renderer in ipairs(R.config) do

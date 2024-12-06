@@ -1,14 +1,15 @@
 --- @module "neomark.autocommands"
 ---
---- Neomark API module holding its autocommands.
+--- Neomark module holding its autocommands
 ---
 local A = {}
 
 local api = require('neomark.api')
 
---- Function to load autocommands.
+--- Function to load autocommands
 ---
 --- @param config neomark.config
+---
 function A.load(config)
     vim.api.nvim_create_autocmd({ 'BufEnter' }, {
         pattern = config.filetypes,
@@ -20,6 +21,7 @@ function A.load(config)
         end
     })
 
+    -- Clear cursor line and re-render
     vim.api.nvim_create_autocmd({ 'CursorMoved' }, {
         pattern = config.filetypes,
         callback = function()

@@ -1,7 +1,6 @@
 --- @module "neomark.api.interactive"
 ---
---- Neomark API submodule providing features to interact with markdown
---- elements such as checkboxes and links.
+--- Neomark API submodule providing features to interact with markdown elements such as checkboxes and links
 ---
 local I = {}
 
@@ -13,6 +12,7 @@ local I = {}
 --- @field elements table<neomark.api.element | any> Table of buffer-mapped arrays of interactive elements
 --- @field current_element integer[] Table of buffer-mapped interac element indicies
 --- @field interactive_mode boolean[] Table of buffer-mapped interactive mode states
+---
 I.state = {
     current_buffer = 0,
     elements = {},
@@ -20,7 +20,7 @@ I.state = {
     interactive_mode = {}
 }
 
---- Neomark API interactive submodule initialization function>
+--- Neomark API interactive submodule initialization function
 ---
 --- (Re)Initializes buffer stat on buffer entry.
 ---
@@ -31,7 +31,7 @@ function I.init()
     I.state.interactive_mode[I.state.current_buffer] = I.state.interactive_mode[I.state.current_buffer] or false
 end
 
---- Set interactive mode for the current buffer.
+--- Set interactive mode for the current buffer
 ---
 --- @param mode boolean Interactive mode setting.
 ---
@@ -39,7 +39,7 @@ function I.set_interactive_mode(mode)
     I.state.interactive_mode[I.state.current_buffer] = mode
 end
 
---- Retrieve interactive mode state of the active buffer.
+--- Retrieve interactive mode state of the active buffer
 ---
 --- @return boolean Interactive mode state of the active buffer
 ---
@@ -47,7 +47,7 @@ function I.get_interactive_mode()
     return I.state.interactive_mode[I.state.current_buffer] or false
 end
 
---- Retrieve array of interactive elements of the active buffer.
+--- Retrieve array of interactive elements of the active buffer
 ---
 --- @return neomark.api.element[] array of interactive elements of the active buffer
 ---
@@ -55,12 +55,12 @@ function I.get_elements()
     return I.state.elements[I.state.current_buffer]
 end
 
---- Clear interactive elements array of the active buffer.
+--- Clear interactive elements array of the active buffer
 function I.clear()
     I.state.elements[I.state.current_buffer] = {}
 end
 
---- Add an interactive element to the state of the active buffer.
+--- Add an interactive element to the state of the active buffer
 ---
 --- @param element neomark.api.element Element to be added
 ---
@@ -77,7 +77,7 @@ function I.get_current_element_idx()
     return I.state.current_element[I.state.current_buffer]
 end
 
---- Set current element index of the active buffer.
+--- Set current element index of the active buffer
 ---
 --- @param idx integer Current element index to be set
 ---
@@ -85,7 +85,7 @@ function I.set_current_element_idx(idx)
     I.state.current_element[I.state.current_buffer] = idx
 end
 
---- Find an return interactive element closest to the cursor in the active buffer.
+--- Find an return interactive element closest to the cursor in the active buffer
 ---
 --- @return neomark.api.element | nil Found element
 function I.get_closest_element()
@@ -110,7 +110,7 @@ function I.get_closest_element()
     return elements[1]
 end
 
---- Find and return next element relative to current element state.
+--- Find and return next element relative to current element state
 ---
 --- @return neomark.api.element | nil Found element
 ---
@@ -133,7 +133,7 @@ function I.get_next_element()
 end
 
 
---- Find and return previous element relative to current element state.
+--- Find and return previous element relative to current element state
 ---
 --- @return neomark.api.element | nil Found element
 ---
@@ -155,8 +155,7 @@ function I.get_previous_element()
     end
 end
 
---- Find and return the 1st element on the closest
---- next line containing interactive elements.
+--- Find and return the 1st element on the closest next line containing interactive elements
 ---
 --- @return neomark.api.element | nil Found element
 ---
@@ -187,8 +186,7 @@ function I.get_next_line_element()
     return nil
 end
 
---- Find and return the 1st element on the closest
---- previous line containing interactive elements.
+--- Find and return the 1st element on the closest previous line containing interactive elements
 ---
 --- @return neomark.api.element | nil Found element
 ---
@@ -235,7 +233,7 @@ end
 
 --- @class neomark.api.interactive.interact_callbacks
 ---
---- Table of element interaction callbacks.
+--- Table of element interaction callbacks
 I.interact_callbacks = {
     --- Togglex checkbox.
     ---
@@ -256,10 +254,10 @@ I.interact_callbacks = {
         end
     end,
 
-    --- Open link.
+    --- Open link
     ---
-    --- Opens file in a new buffer if pointing to a file.
-    --- If http/s link opens uses xdg-open to open the link in a browser.
+    --- Opens file in a new buffer if pointing to a file
+    --- If http/s link opens uses xdg-open to open the link in a browser
     --- 
     --- @param _ any
     --- @param estart integer Element start column index
@@ -278,7 +276,7 @@ I.interact_callbacks = {
     end
 }
 
---- Interact with the nth interactive element form the buffer state.
+--- Interact with the nth interactive element form the buffer state
 ---
 --- @param element_idx integer Buffer state element index
 ---a custom type 
@@ -299,7 +297,7 @@ end
 ---
 --- Table of cursor movement directions and callbacks
 I.movement = {
-    --- @enum neomark.api.interactive.movement.directions
+    --- @enum neomark.api.interactive.movement.direction
     ---
     --- Cursor movement directions
     directions = {
@@ -320,9 +318,9 @@ I.movement = {
     }
 }
 
---- Move cursor between interactive elements.
+--- Move cursor between interactive elements
 ---
---- @param direction string (neomark.api.interactive.movement.callbacks)
+--- @param direction neomark.api.interactive.movement.direction | string Movement direction
 ---
 function I.move_cursor(direction)
     local e = I.movement.callbacks[direction]()
@@ -356,8 +354,8 @@ end
 
 --- Cursor movement command
 ---
---- @param direction string (neomark.api.interactive.movement.directions) Direction to move cursor in
---- @param accelerator neomark.api.config.keymaps Keymap accelerator
+--- @param direction neomark.api.interactive.movement.direction | string Direction to move cursor in
+--- @param accelerator neomark.config.keymap Keymap accelerator
 ---
 function I.move(direction, accelerator)
     if I.get_interactive_mode() then
@@ -369,7 +367,7 @@ end
 
 --- Command to interact with an element
 ---
---- @param accelerator neomark.api.config.keymaps Keymap accelerator
+--- @param accelerator neomark.config.keymap Keymap accelerator
 ---
 function I.interact(accelerator)
     if I.get_interactive_mode() then
