@@ -9,6 +9,9 @@
 --- @field keymaps table Table containing interactive mode keymaps
 ---
 local config = {
+    --- @table neomark.api.rendering.supported
+    ---
+    --- Table containing settings to disable specific element rendering
     disable = {},
 
     filetypes = { '*.md' },
