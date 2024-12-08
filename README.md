@@ -61,8 +61,6 @@ Optionally you can configure Treesitter on its own then install its markdown par
     -- rest of plugin config
 }
 ```
-
-
 ## Configuration
 
 ### Default config
@@ -162,7 +160,7 @@ Pick and place snippets:
 
 To bring up telescope pick and place window tab out of the snippets `url` node without editing it.
 
-### Troubleshooting
+## Troubleshooting
 
 1. Check if lazy loads Neomark using `:Lazy`. If not, you have probably missed `opts` in the plugin config.
 (see [Installation](#Installation))
@@ -170,7 +168,7 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 2. If rendering, concealment or optional features like pick and place snippets are not working there's prolly a missng/misconfigured dependency. Use `:checkhealth` to get info about installed dependencies.
 
 3. If pick and place snippets do not trigger check your `opts` if enabled.
-(see [Snippets configuration](#Snippet-configuration))
+(see [Snippet configuration](#Snippet-configuration))
 
 ## Upcomming features
 
