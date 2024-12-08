@@ -2,7 +2,7 @@
 ---
 --- Neomark module holding its autocommands
 ---
-local A = {}
+local Autocommands = {}
 
 local api = require('neomark.api')
 
@@ -10,7 +10,7 @@ local api = require('neomark.api')
 ---
 --- @param config neomark.config
 ---
-function A.load(config)
+function Autocommands.load(config)
     vim.api.nvim_create_autocmd({ 'BufEnter' }, {
         pattern = config.filetypes,
         callback = function()
@@ -48,4 +48,4 @@ function A.load(config)
     })
 end
 
-return A
+return Autocommands

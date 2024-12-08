@@ -30,6 +30,8 @@ local config = {
         down = '<Down>',
         interact = '<CR>'
     },
+
+    snippets = false,
 }
 
 return config

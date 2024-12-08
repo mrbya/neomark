@@ -2,7 +2,7 @@
 ---
 --- Neomark keymaps module
 ---
-local K = {}
+local Keymaps = {}
 
 local commands = require('neomark.commands').commands
 
@@ -11,7 +11,7 @@ local commands = require('neomark.commands').commands
 --- @param cmd neomark.commands.command Neomark command
 --- @param keymap neomark.config.keymap Neomark keymap
 ---
-function K.create_keymap(cmd, keymap)
+function Keymaps.create_keymap(cmd, keymap)
     if keymap and cmd then
         vim.keymap.set(
             'n',
@@ -32,12 +32,12 @@ end
 ---
 --- @param config neomark.config
 ---
-function K.load(config)
+function Keymaps.load(config)
     local keymaps = config.keymaps
 
     for command, keymap in pairs(keymaps) do
-        K.create_keymap(commands[command], keymap)
+        Keymaps.create_keymap(commands[command], keymap)
     end
 end
 
-return K
+return Keymaps

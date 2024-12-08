@@ -8,6 +8,7 @@ local neomark = {
     config       = require('neomark.config'),
     commands     = require('neomark.commands'),
     keymaps      = require('neomark.keymaps'),
+    snippets     = require('neomark.snippets'),
 }
 
 --- Parse user config and load Neomark API
@@ -21,6 +22,7 @@ function neomark.setup(opts)
     neomark.autocommands.load(neomark.config)
     neomark.commands.load(neomark.config)
     neomark.keymaps.load(neomark.config)
+    neomark.snippets.load(neomark.config)
 end
 
 return neomark

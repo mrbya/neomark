@@ -2,7 +2,7 @@
 ---
 --- Neomark commands module
 ---
-local C = {}
+local Commands = {}
 
 local api = require("neomark.api")
 
@@ -18,7 +18,7 @@ local api = require("neomark.api")
 ---
 --- Neomark commands
 ---
-C.commands = {
+Commands.commands = {
     interactive_mode_enter = {
         name = 'Nmie',
         desc = 'Enter interactive mode',
@@ -81,7 +81,7 @@ C.commands = {
 --- @param cmd neomark.commands.command Neomark command
 --- @param args any Optional command callback arguments
 ---
-function C.create_command(cmd, args)
+function Commands.create_command(cmd, args)
     if cmd then
         vim.api.nvim_create_user_command(
             cmd.name,
@@ -100,12 +100,12 @@ end
 ---
 --- @param config neomark.config Neomark config
 ---
-function C.load(config)
+function Commands.load(config)
     local keymaps = config.keymaps
 
     for command, keymap in pairs(keymaps) do
-        C.create_command(C.commands[command], keymap)
+        Commands.create_command(Commands.commands[command], keymap)
     end
 end
 
-return C
+return Commands
