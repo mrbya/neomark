@@ -47,7 +47,7 @@ Optionally you can configure Treesitter on its own then install its markdown par
 
 ### Optional dependencies
 
-[L3MON4D3/LuaSnip](https://github.com/L3MON4D3/LuaSnip) and [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim/tree/master) required if you want to use pick and place snippets 
+[LuaSnip](https://github.com/L3MON4D3/LuaSnip) and [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim/tree/master) required if you want to use pick and place snippets 
 ```lua
 {
     'mrbya/neomark',
