@@ -30,7 +30,7 @@ So far tested only with [lazy.nvim](https://github.com/folke/lazy.nvim)
     'mrbya/neomark',
     event = 'VeryLazy',
     dependencies = {
-        -- reesitter with markdown parser
+        -- Treesitter with markdown parser
         'nvim-treesitter/nvim-treesitter',
         opts = {
             ensure_installed = {

@@ -27,7 +27,7 @@ end
 
 --- Pick and place file callback for snippets
 ---
---- @param node table Snippet node tha callback is haned on
+--- @param node table Snippet node tha callback is hanged on
 ---
 function Snippets.picknplace(node)
     if node:get_text()[1] ~= 'url' then
