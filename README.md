@@ -30,7 +30,7 @@ So far tested only with [lazy.nvim](https://github.com/folke/lazy.nvim)
     'mrbya/neomark',
     event = 'VeryLazy',
     dependencies = {
-        -- Install Treesitter markdown parser or configure
+        -- reesitter with markdown parser
         'nvim-treesitter/nvim-treesitter',
         opts = {
             ensure_installed = {
@@ -163,11 +163,13 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 ## Troubleshooting
 
 1. Check if lazy loads Neomark using `:Lazy`. If not, you have probably missed `opts` in the plugin config.
+
 (see [Installation](#Installation))
 
 2. If rendering, concealment or optional features like pick and place snippets are not working there's prolly a missng/misconfigured dependency. Use `:checkhealth` to get info about installed dependencies.
 
 3. If pick and place snippets do not trigger check your `opts` if enabled.
+
 (see [Snippet configuration](#Snippet-configuration))
 
 ## Upcomming features
