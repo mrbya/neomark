@@ -12,13 +12,13 @@ I have been using Obsidian for a while, however, due to some undisclosed circums
     - Supported elements so far: 
         - headers: `#`, `##`, ...
         - inline formatting: bold, italic, strikethrough 
-        - checkboxes: `- [ ]`/`#. [ ]`
+        - checkboxes: `- [ ]`/`No. [ ]`
         - links: `[Link](url)`
         - code blockx - both inline and multiline
 
 2. Interactive mode - lets you jump between interactive elements like links and checkboxes and interact with them (toggle checkboxes, open links)
 
-3. Snippets with a pick and place telescope window to insert links
+3. Snippets with a pick and place telescope window to insert links and images
 
 ## Installation
 
@@ -28,22 +28,25 @@ So far tested only with [lazy.nvim](https://github.com/folke/lazy.nvim)
 ```lua
 {
     'mrbya/neomark',
-    event = 'VeryLazy',
     dependencies = {
         -- Treesitter with markdown parser
         'nvim-treesitter/nvim-treesitter',
         opts = {
+            highlight = {
+                enable = true,
+            },
             ensure_installed = {
                 'markdown',
             },
         },
     },
+    event = 'VeryLazy',
     opts = { },
 }
 ```
 `opts` table required to load plugin (even if empty).
 
-Optionally you can configure Treesitter on its own then install its markdown parser using `opts` or `:TSInstall markdown`
+Alternatively you can configure Treesitter on its own then install its markdown parser using `opts` in its config or `:TSInstall markdown`
 
 ### Optional dependencies
 
@@ -52,21 +55,62 @@ Optionally you can configure Treesitter on its own then install its markdown par
 {
     'mrbya/neomark',
     dependencies = {
-        -- Treesitter config
-
+        -- Treesitter config...
+        
+        -- LuaSnip & telescope.nvim
         'L3MON4D3/LuaSnip',
         'nvim-telescope/telescope.nvim'
     },
 
-    -- rest of plugin config
+    -- rest of plugin config...
 }
 ```
+
+to render Images inline with text you can use [image.nvim](https://github.com/3rd/image.nvim) heres a [lazy.nvim](https://github.com/folke/lazy.nvim) config I for with kitty + tmux:
+```lua
+{
+        '3rd/image.nvim',
+        lazy = false,
+        config = function ()
+            require("image").setup({
+              backend = "kitty",
+              processor = "magick_rock",
+              integrations = {
+                markdown = {
+                  enabled = true,
+                  clear_in_insert_mode = false,
+                  download_remote_images = true,
+                  only_render_image_at_cursor = false,
+                  floating_windows = false,
+                  filetypes = { "markdown", "vimwiki" },
+                },
+                html = {
+                  enabled = true,
+                },
+                css = {
+                  enabled = true,
+                },
+              },
+              max_width = nil,
+              max_height = nil,
+              max_width_window_percentage = 50,
+              max_height_window_percentage = 75,
+              window_overlap_clear_enabled = false,
+              window_overlap_clear_ft_ignore = { "cmp_menu", "cmp_docs", "" },
+              editor_only_render_when_focused = false,
+              tmux_show_only_in_active_window = true,
+              hijack_file_patterns = { "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.avif" },
+            })
+        end
+    },
+```
+
 ## Configuration
 
 ### Default config
 ```lua
 {
-    disable = {},
+    disable = { },
 
     filetypes = { '*.md' },
 
@@ -172,5 +216,7 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 
 ## Upcomming features
 
-1. Rendering tables
-2. Maybe image rendering (no idea how to implenet it yet tho :sweat_smile:)
+1. Opening links to markdown file sections (url#header)
+2. Rendering tables
+3. Copy pasting images
+4. plantuml?
