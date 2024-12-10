@@ -66,7 +66,7 @@ Alternatively you can configure Treesitter on its own then install its markdown 
 }
 ```
 
-to render Images inline with text you can use [image.nvim](https://github.com/3rd/image.nvim) heres a [lazy.nvim](https://github.com/folke/lazy.nvim) config I for with kitty + tmux:
+to render Images inline with text you can use [image.nvim](https://github.com/3rd/image.nvim) heres a [lazy.nvim](https://github.com/folke/lazy.nvim) config I use with kitty + tmux:
 ```lua
 {
         '3rd/image.nvim',
