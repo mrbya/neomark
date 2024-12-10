@@ -18,16 +18,16 @@ return {
         if neomark and neomark.config.snippets then
             local luasnip = pcall(require, 'luasnip')
             if luasnip then
-                vim.health.ok('LuaSnip installed')
+                vim.health.ok('LuaSnip installed.')
             else
                 vim.health.warn('LuaSnip required for pick and place snippets!')
             end
 
             local telescope = pcall(require, 'telescope.builtin')
             if telescope then
-                vim.health.ok('Telescope installed')
+                vim.health.ok('Telescope installed.')
             else
-                vim.health.warn('Telescope required for pick and place snippets')
+                vim.health.warn('Telescope required for pick and place snippets!')
             end
         else
             vim.health.warn('Pick and place snippets disabled.')
