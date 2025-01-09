@@ -257,6 +257,7 @@ Interactive.interact_callbacks = {
     --- Open link
     ---
     --- Opens file in a new buffer if pointing to a file
+    --- Optionally moves cursor if a specific section is linked
     --- If http/s link opens uses xdg-open to open the link in a browser
     --- 
     --- @param _ any
@@ -267,10 +268,43 @@ Interactive.interact_callbacks = {
         local start, stop, link = line:find('%[.-%]%((.-)%)', estart)
         if start and stop then
             local prefix = link:find('https?:%/%/')
+            if not prefix then
+                prefix = link:find('www.')
+            end
             if prefix then
                 vim.fn.system('xdg-open ' .. vim.fn.shellescape(link))
             else
-                vim.api.nvim_command('edit ' .. link)
+                local newBuffer = false
+
+                -- look for section suffix
+                local _, _, suffix, section = link:find('.+(%#(%S+)%s*)$')
+                if suffix then
+                    newBuffer = true
+                else
+                    _, _, section = link:find('^%s*%#(%S+)$')
+                end
+
+                -- open linked file (if need be) and move cursor to the corresponding section
+                if section then
+                    if newBuffer then
+                        link:gsub(suffix, "")
+                        vim.api.nvim_command('edit ' .. link)
+                    end
+                    -- move cursor
+                    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+                    for idx, tline in ipairs(lines) do
+                        tline = tline:gsub('%s', '-')
+
+                        local col = tline:find('^#+%-*' .. section)
+                        if col then
+                            vim.api.nvim_win_set_cursor(0, {idx, col + 1})
+                            Interactive.set_interactive_mode(false)
+                            return
+                        end
+                    end
+                else
+                    vim.api.nvim_command('edit ' .. link)
+                end
             end
         end
     end
