@@ -11,6 +11,7 @@ local api = require('neomark.api')
 --- @param config neomark.config
 ---
 function Autocommands.load(config)
+    -- Initialize/re-initialize buffer state on buffer entry 
     vim.api.nvim_create_autocmd({ 'BufEnter' }, {
         pattern = config.filetypes,
         callback = function()

@@ -31,7 +31,7 @@ function Interactive.init()
     Interactive.state.interactive_mode[Interactive.state.current_buffer] = Interactive.state.interactive_mode[Interactive.state.current_buffer] or false
 end
 
---- Set interactive mode for the current buffer
+--- Set interactive mode state of the current buffer
 ---
 --- @param mode boolean Interactive mode setting
 ---
@@ -49,7 +49,7 @@ end
 
 --- Retrieve array of interactive elements of the active buffer
 ---
---- @return neomark.api.element[] array of interactive elements of the active buffer
+--- @return neomark.api.element[] array of interactive elements in the active buffer
 ---
 function Interactive.get_elements()
     return Interactive.state.elements[Interactive.state.current_buffer]
@@ -85,7 +85,7 @@ function Interactive.set_current_element_idx(idx)
     Interactive.state.current_element[Interactive.state.current_buffer] = idx
 end
 
---- Find an return interactive element closest to the cursor in the active buffer
+--- Find and return interactive element closest to the cursor in the active buffer
 ---
 --- @return neomark.api.element | nil Found element
 function Interactive.get_closest_element()
@@ -278,7 +278,7 @@ Interactive.interact_callbacks = {
 
 --- Interact with the nth interactive element form the buffer state
 ---
---- @param element_idx integer Buffer state element index
+--- @param element_idx integer Buffer state interactive element index
 ---a custom type 
 function Interactive.interact_action(element_idx)
     local element = Interactive.get_elements()[element_idx]
@@ -295,7 +295,7 @@ end
 
 --- @class neomark.api.interactive.movement
 ---
---- Table of cursor movement directions and callbacks
+--- Table of cursor movement directions and their callbacks
 Interactive.movement = {
     --- @enum neomark.api.interactive.movement.direction
     ---
