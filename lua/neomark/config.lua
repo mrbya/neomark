@@ -5,7 +5,7 @@
 --- Configuration table for Neomark API
 ---
 --- @field disable table Table containing disabled elements
---- @field filetypes table Table setting file patterns to use Neomark with
+--- @field filetypes table Table setting file patterns for which to load Neomark
 --- @field keymaps table Table containing interactive mode keymaps
 ---
 local config = {

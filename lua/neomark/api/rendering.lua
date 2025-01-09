@@ -30,7 +30,7 @@ Rendering.namespaces = {}
 
 --- @class neomark.api.rendering.element
 ---
---- Table providing element types and renderers
+--- Table holding element types and their renderers
 ---
 Rendering.element = {
     --- @enum neomark.api.rendering.element.types
@@ -118,7 +118,7 @@ end
 
 --- @type table<string, function>
 ---
---- Supported element renderrers
+--- Supported element renderers
 ---
 Rendering.element.renderers = {
     checkbox = function(i, line)
@@ -154,33 +154,39 @@ Rendering.element.renderers = {
                 priority = 1,
             })
 
-            return Rendering.create_interactive_element(
+            return {Rendering.create_interactive_element(
                 i - 1,
                 start,
                 stop,
                 start + preflen + 2,
                 1,
                 Rendering.element.types.checkbox
-            )
+            )}
         end
     end,
 
     link = function(i, line)
         local search_start = 0
+        local links = {}
         for _ in line:gmatch('%[(.[^%]]-)%]%(.-%)') do
             local start, stop, alt = line:find('%[(.[^%]]-)%]%(.-%)', search_start)
             if start and stop then
                 search_start = stop
-                return Rendering.create_interactive_element(
-                    i - 1,
-                    start,
-                    stop,
-                    start,
-                    alt:len(),
-                    Rendering.element.types.link
+                table.insert(
+                    links,
+                    Rendering.create_interactive_element(
+                        i - 1,
+                        start,
+                        stop,
+                        start,
+                        alt:len(),
+                        Rendering.element.types.link
+                    )
                 )
             end
         end
+
+        return links
     end,
 
     inline = function(i, line)
@@ -275,9 +281,11 @@ Rendering.element.renderers = {
 function Rendering.render_line(line_idx, line)
     local interactive_elements = {}
     for _, renderer in ipairs(Rendering.config) do
-        local ie = Rendering.element.renderers[renderer](line_idx, line)
-        if ie then
-            table.insert(interactive_elements, ie)
+        local ies = Rendering.element.renderers[renderer](line_idx, line)
+        if ies and ies ~= {} then
+            for _, element in ipairs(ies) do
+                table.insert(interactive_elements, element)
+            end
         end
     end
 

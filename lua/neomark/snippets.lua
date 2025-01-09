@@ -25,9 +25,9 @@ if Snippets.available then
     }
 end
 
---- Pick and place file callback for snippets
+--- File pick and place callback for snippets
 ---
---- @param node table Snippet node tha callback is hanged on
+--- @param node table Snippet node context to pass into callback
 ---
 function Snippets.picknplace(node)
     if node:get_text()[1] ~= 'url' then
