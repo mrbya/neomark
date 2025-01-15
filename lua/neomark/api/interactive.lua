@@ -313,7 +313,7 @@ Interactive.interact_callbacks = {
 --- Interact with the nth interactive element form the buffer state
 ---
 --- @param element_idx integer Buffer state interactive element index
----a custom type 
+---
 function Interactive.interact_action(element_idx)
     local element = Interactive.get_elements()[element_idx]
     if not element or element == {} then
@@ -368,9 +368,11 @@ function Interactive.enter()
     local e = Interactive.get_closest_element()
 
     if e and e ~= {} then
-        vim.notify('Interactive mode', vim.log.levels.INFO)
         Interactive.set_interactive_mode(true)
         vim.api.nvim_win_set_cursor(0, { e.line + 1, e.istart })
+
+        vim.notify('Interactive mode - enter', vim.log.levels.INFO)
+        vim.api.nvim_echo({ { 'Interactive mode' } }, false, {})
     else
         vim.notify('No interactive elements!', vim.log.levels.ERROR)
     end
@@ -378,12 +380,14 @@ end
 
 --- Exit interactive mode
 function Interactive.exit()
+    Interactive.set_interactive_mode(false)
+
     if Interactive.get_interactive_mode() then
-        print(' ')
+        vim.notify('Interactive mode - exit', vim.log.levels.INFO)
+        vim.api.nvim_echo({}, false, {})
     else
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, true, true), 'n', true)
     end
-    Interactive.set_interactive_mode(false)
 end
 
 --- Cursor movement command

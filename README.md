@@ -4,7 +4,7 @@ A Neovim plugin for folks who love taking notes in markdown and hate to leave th
 
 ## Motivation
 
-I have been using Obsidian for a while, however, due to some undisclosed circumstances I have lost my taste for it and I have been looking for an (idally terminal based) alternatives that would provide an experience similar to that of Obsidians combined preview/edit mode. Tried both stand-alone tools and neovim plugins for rendering/editing markdown files even the obsidian plugin for nvim. All of them were not even close feature-wise or they have not been working at all (but then again, I'm terrible @ reading docs and writing configs so that could have been on me :sweat_smile:). So being as picky as I am, what choice did I have other than to write a markdown plugin of my own? :sweat_smile:
+I have been using Obsidian for a while, however, due to some undisclosed circumstances I have lost my taste for it and I have been looking for an (ideally terminal based) alternatives that would provide an experience similar to that of Obsidians combined preview/edit mode. Tried both stand-alone tools and neovim plugins for rendering/editing markdown files even the obsidian plugin for nvim. However, none of them were even close feature-wise, or they have not been working at all (but then again, I'm terrible @ reading docs and writing configs so that could have been on me :sweat_smile:). So being as picky as I am, what choice did I have other than to write a markdown plugin of my own? :sweat_smile:
 
 ## Features
 
@@ -14,7 +14,7 @@ I have been using Obsidian for a while, however, due to some undisclosed circums
         - inline formatting: bold, italic, strikethrough 
         - checkboxes: `- [ ]`/`No. [ ]`
         - links: `[Link](url)`
-        - code blockx - both inline and multiline
+        - code blocks - both inline and multiline with syntax highlighting powerred by [Treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
 
 2. Interactive mode - lets you jump between interactive elements like links and checkboxes and interact with them (toggle checkboxes, open links)
 
@@ -120,11 +120,11 @@ to render Images inline with text you can use [image.nvim](https://github.com/3r
         forward = '<Right>',
         backward = '<Left>',
         up = '<Up>',
-        Down = '<Down>'
+        down = '<Down>'
         interact = '<CR>',
     },
 
-    snippets = true,
+    snippets = false,
 }
 ```
 
@@ -216,7 +216,10 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 
 ## Upcomming features
 
-1. Opening links to markdown file sections (url#header)
+~1. Opening links to markdown file sections (url#header)~
+~2. Checkbox snippet~
+1. Toggle bold/itallic/strikethrough in vm
+2. Automatic numbering
 2. Rendering tables
 3. Copy pasting images
 4. plantuml?

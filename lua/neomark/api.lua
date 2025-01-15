@@ -4,8 +4,9 @@
 --- Contains the top-level implementation of neomark api
 ---
 local M = {
-    rendering   = require('neomark.api.rendering'),
-    interactive = require('neomark.api.interactive'),
+    rendering    = require('neomark.api.rendering'),
+    interactive  = require('neomark.api.interactive'),
+    autocomplete = require('neomark.api.autocomplete')
 }
 
 --- @class neomark.api.element
@@ -26,6 +27,7 @@ local M = {
 ---
 function M.init(config)
     M.rendering.init(config)
+    M.autocomplete.load()
 end
 
 --- Function to initialize buffer state
@@ -93,7 +95,7 @@ end
 
 --- Load neomark api.
 function M.load(config)
-    vim.api.nvim_clear_autocmds({pattern = '*.md'})
+    vim.api.nvim_clear_autocmds({pattern = config.filetypes})
     M.init(config)
 end
 

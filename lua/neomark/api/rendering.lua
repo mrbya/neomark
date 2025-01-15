@@ -36,7 +36,7 @@ Rendering.element = {
     --- @enum neomark.api.rendering.element.types
     types = {
         checkbox = 'checkbox',
-        link = 'link'
+        link = 'link',
     },
 }
 
