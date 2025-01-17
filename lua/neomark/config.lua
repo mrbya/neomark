@@ -28,7 +28,10 @@ local config = {
         backward = '<Left>',
         up = '<Up>',
         down = '<Down>',
-        interact = '<CR>'
+        interact = '<CR>',
+        format_bold = '<leader>b',
+        format_italic = '<leader>i',
+        format_strikethrough = '<leader>s',
     },
 
     snippets = false,

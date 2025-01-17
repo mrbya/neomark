@@ -1,7 +1,7 @@
 --- @module "neomark.api.autocomplete"
 ---
 --- Neomark API submodule providing autocomplete for numbered lists and bullet point lists
-local A = {}
+local Autocomplete = {}
 
 --- @class neomark.api.autocomplete.state
 ---
@@ -10,7 +10,7 @@ local A = {}
 --- @field current_buffer integer Active buffer index
 --- @field buffer_len integer[] Table containing lengths of open buffers
 ---
-A.state = {
+Autocomplete.state = {
     current_buffer = 0,
     buffer_len = {},
 }
@@ -19,7 +19,7 @@ A.state = {
 ---
 --- Supported autocomplete elements
 ---
-A.supported = {
+Autocomplete.supported = {
     'bullet_point_list',
     'numbered_list',
 }
@@ -28,48 +28,48 @@ A.supported = {
 ---
 --- Table to hold autocomplete api config
 ---
-A.config = {}
+Autocomplete.config = {}
 
 --- Function to load neomark autocomplete API
 --- 
 --- @param config neomark.config Neomark config
 ---
-function A.load(config)
+function Autocomplete.load(config)
     local disable = {}
 
     for _, element in ipairs(config.disable) do
         disable[element] = true
     end
 
-    A.config = {}
-    for _, element in ipairs(A.supported) do
+    Autocomplete.config = {}
+    for _, element in ipairs(Autocomplete.supported) do
         if not disable[element] then
-            table.insert(A.config, element)
+            table.insert(Autocomplete.config, element)
         end
     end
 end
 
 -- (Re)Initializes buffer state on buffer entry
 --
-function A.init()
-    A.state.current_buffer = vim.api.nvim_get_current_buf()
-    A.state.buffer_len[A.state.current_buffer] = vim.api.nvim_buf_line_count(0)
+function Autocomplete.init()
+    Autocomplete.state.current_buffer = vim.api.nvim_get_current_buf()
+    Autocomplete.state.buffer_len[Autocomplete.state.current_buffer] = vim.api.nvim_buf_line_count(0)
 end
 
 --- Updates active buffer length state
 ---
 --- @param len integer Active buffer length
 ---
-function A.set_buffer_len(len)
-    A.state.buffer_len[A.state.current_buffer] = len
+function Autocomplete.set_buffer_len(len)
+    Autocomplete.state.buffer_len[Autocomplete.state.current_buffer] = len
 end
 
 --- Returns active buffer length
 ---
 --- @return integer Active buffer length
 ---
-function A.get_buffer_len()
-    return A.state.buffer_len[A.state.current_buffer]
+function Autocomplete.get_buffer_len()
+    return Autocomplete.state.buffer_len[Autocomplete.state.current_buffer]
 end
 
 --- @class neomark.api.autocomplete.completer
@@ -85,7 +85,7 @@ end
 ---
 --- Supported element completers
 ---
-A.completers = {
+Autocomplete.completers = {
     bullet_point_list = {
         pattern = '-',
         dynamic = false,
@@ -110,14 +110,14 @@ A.completers = {
 --- @param line_idx integer Line index
 --- @param completer neomark.api.autocomplete.completer Element completer
 ---
-function A.complete(line, line_idx, completer)
+function Autocomplete.complete(line, line_idx, completer)
     local start, stop, prefix, value = line:find('^(%s*)(' .. completer.pattern .. ')%s+%S')
     if start and stop and value then
         value = completer.value_processor(value)
         vim.api.nvim_buf_set_lines(0, line_idx, line_idx + 1, false, { prefix .. value .. " " })
         vim.api.nvim_win_set_cursor(0, { line_idx + 1, prefix:len() + value:len() + 1 })
 
-        if (not completer.dynamic or line_idx + 1 >= A.get_buffer_len()) then
+        if (not completer.dynamic or line_idx + 1 >= Autocomplete.get_buffer_len()) then
             return
         end
 
@@ -141,7 +141,7 @@ function A.complete(line, line_idx, completer)
         if start and stop and value then
             vim.api.nvim_buf_set_lines(0, line_idx - 1 , line_idx, false, {})
 
-            if completer.dynamic or line_idx + 1 >= A.get_buffer_len() then
+            if completer.dynamic or line_idx + 1 >= Autocomplete.get_buffer_len() then
                 local tidx = line_idx
                 local tline, item, tprefix, tsuffix
                 repeat
@@ -163,18 +163,18 @@ end
 
 --- Process autocomplete for the current line
 ---
-function A.process_line()
+function Autocomplete.process_line()
     local cursor = vim.api.nvim_win_get_cursor(0);
     local line_idx = cursor[1] - 1;
 
     if line_idx > 1 then
         local line = vim.api.nvim_buf_get_lines(0, line_idx - 1, line_idx, false)[1]
         if line and line ~= "" then
-            for _, completer in pairs(A.config) do
-                A.complete(line, line_idx, A.completers[completer])
+            for _, completer in pairs(Autocomplete.config) do
+                Autocomplete.complete(line, line_idx, Autocomplete.completers[completer])
             end
         end
     end
 end
 
-return A
+return Autocomplete

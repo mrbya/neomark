@@ -14,7 +14,7 @@ local commands = require('neomark.commands').commands
 function Keymaps.create_keymap(cmd, keymap)
     if keymap and cmd then
         vim.keymap.set(
-            'n',
+            cmd.mode,
             keymap,
             function()
                 cmd.callback(keymap)

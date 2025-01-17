@@ -22,6 +22,8 @@ I have been using Obsidian for a while, however, due to some undisclosed circums
 
 4. List autocompletion - automatic numbering and insertion for numberred and bullet point lists
 
+5. Format selected text to bold/italic/strikethrough in visual mode
+
 ## Installation
 
 Neomark piggybacks off of [Treesitter](https://github.com/nvim-treesitter/nvim-treesitter) markdown parser for link concealment and code block syntax highlighting.
@@ -122,8 +124,11 @@ to render Images inline with text you can use [image.nvim](https://github.com/3r
         forward = '<Right>',
         backward = '<Left>',
         up = '<Up>',
-        down = '<Down>'
+        down = '<Down>',
         interact = '<CR>',
+        format_bold = '<leader>b',
+        format_italic = '<leader>i',
+        format_strikethrough = '<leader>s',
     },
 
     snippets = false,
@@ -195,6 +200,14 @@ opts = {
 2. Use `<leader>i` to enter interactive mode:
     - Use arrow keys to navigate between interactive elements
     - Use `<CR>` to interact with an element
+3. Format selection in visual mode using:
+
+| Keymap | Command |
+| -------------- | --------------- |
+| `<leader>b` | Format selection to bold |
+| `<leader>i` | Format selection to italic |
+| `<leader>s` | Format selection to strikethrough |
+
 
 ### Commands
 
@@ -209,6 +222,9 @@ Same features can be acccessed using commands:
 | Navigate up | `Nmiu` |
 | Navigate down | `Nmid` |
 | Interact | `Nnii` |
+| Format to bold | `Nmfb` |
+| Format to italic | `Nmfi` |
+| Format to strikethrough | `Nmfs` |
 
 ### Snippets
 
@@ -235,8 +251,9 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 
 - [x] Opening links to markdown file sections (url#header)
 - [x] Checkbox snippet
-- [ ] Toggle bold/itallic/strikethrough in vm
+- [x] Format selection in vm
 - [x] Automatic numbering
-- [ ] Rendering tables
-- [ ] Copy pasting images
+- [ ] Toggle formatting
+- [ ] Render tables
+- [ ] Copy paste images
 - [ ] plantuml?

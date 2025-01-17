@@ -3,10 +3,11 @@
 --- Base file for neomark api
 --- Contains the top-level implementation of neomark api
 ---
-local M = {
+local Api = {
     rendering    = require('neomark.api.rendering'),
     interactive  = require('neomark.api.interactive'),
-    autocomplete = require('neomark.api.autocomplete')
+    autocomplete = require('neomark.api.autocomplete'),
+    formatting   = require('neomark.api.formatting'),
 }
 
 --- @class neomark.api.element
@@ -25,94 +26,94 @@ local M = {
 ---
 --- @param config neomark.config Neomarks config table
 ---
-function M.load_submodules(config)
-    M.rendering.load(config)
-    M.autocomplete.load(config)
+function Api.load_submodules(config)
+    Api.rendering.load(config)
+    Api.autocomplete.load(config)
 end
 
 --- Function to initialize buffer state
-function M.buffer_init()
-    M.interactive.init()
-    M.autocomplete.init()
+function Api.buffer_init()
+    Api.interactive.init()
+    Api.autocomplete.init()
 end
 
 
 --- Clear elements rendering buffer-wide
-function M.clear_rendering()
-    M.rendering.clear()
-    M.interactive.clear()
+function Api.clear_rendering()
+    Api.rendering.clear()
+    Api.interactive.clear()
 end
 
 --- Clear elements rendering of a single line
-function M.clear_line(line)
-    M.rendering.clear_line(line)
+function Api.clear_line(line)
+    Api.rendering.clear_line(line)
 end
 
 --- Render supported elements in a single line
 ---
 --- @param line_idx integer Index of the line to be rendered
 ---
-function M.render_line(line_idx)
+function Api.render_line(line_idx)
     local line = vim.api.nvim_buf_get_lines(0, line_idx - 1, line_idx, false)[1]
     if line then
-        local interactive_elements = M.rendering.render_line(line_idx, line)
+        local interactive_elements = Api.rendering.render_line(line_idx, line)
         if interactive_elements ~= {} then
             for _, element in ipairs(interactive_elements) do
-                M.interactive.add_element(element)
+                Api.interactive.add_element(element)
             end
         end
     end
 end
 
 --- Render supported elements buffer-wide
-function M.render_buffer()
+function Api.render_buffer()
     for i = 1, vim.api.nvim_buf_line_count(0) do
-        M.clear_line(i)
-        M.render_line(i)
+        Api.clear_line(i)
+        Api.render_line(i)
     end
 end
 
 --- Clear a single line @ cursor position and re-render the rest
-function M.render_cursor()
+function Api.render_cursor()
     local line = vim.api.nvim_win_get_cursor(0)[1] - 1
-    M.clear_rendering()
-    M.render_buffer()
-    M.clear_line(line)
+    Api.clear_rendering()
+    Api.render_buffer()
+    Api.clear_line(line)
 end
 
 --- Handle rendering in the current buffer.
-function M.render()
+function Api.render()
     vim.api.nvim_set_option_value('conceallevel', 0, { scope = 'local' })
-    M.clear_rendering()
-    M.render_buffer()
+    Api.clear_rendering()
+    Api.render_buffer()
     vim.api.nvim_set_option_value('conceallevel', 2, { scope = 'local' })
 end
 
 --- Handle clearing of rendering
-function M.clear()
+function Api.clear()
     vim.api.nvim_set_option_value('conceallevel', 0, { scope = 'local' })
-    M.clear_rendering()
+    Api.clear_rendering()
 end
 
 --- Update buffer length for autocomplete
-function M.update_buffer_len()
-    M.autocomplete.set_buffer_len(vim.api.nvim_buf_line_count(0))
+function Api.update_buffer_len()
+    Api.autocomplete.set_buffer_len(vim.api.nvim_buf_line_count(0))
 end
 
 --- Handle autocompletion
-function M.process_autocomplete()
+function Api.process_autocomplete()
     local len = vim.api.nvim_buf_line_count(0)
-    if len > M.autocomplete.get_buffer_len() then
-        M.autocomplete.process_line()
+    if len > Api.autocomplete.get_buffer_len() then
+        Api.autocomplete.process_line()
     end
-    M.autocomplete.set_buffer_len(len)
+    Api.autocomplete.set_buffer_len(len)
 end
 
 --- Load neomark api.
-function M.load(config)
+function Api.load(config)
     vim.api.nvim_clear_autocmds({pattern = config.filetypes})
-    M.load_submodules(config)
+    Api.load_submodules(config)
 end
 
-return M
+return Api
 
