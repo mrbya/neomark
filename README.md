@@ -204,9 +204,9 @@ opts = {
 
 | Keymap | Command |
 | -------------- | --------------- |
-| `<leader>b` | Format selection to bold |
-| `<leader>i` | Format selection to italic |
-| `<leader>s` | Format selection to strikethrough |
+| `<leader>b` | Toggle bold format |
+| `<leader>i` | Toggle italic format |
+| `<leader>s` | Toggle strikethrough format |
 
 
 ### Commands
@@ -222,9 +222,9 @@ Same features can be acccessed using commands:
 | Navigate up | `Nmiu` |
 | Navigate down | `Nmid` |
 | Interact | `Nnii` |
-| Format to bold | `Nmfb` |
-| Format to italic | `Nmfi` |
-| Format to strikethrough | `Nmfs` |
+| Toggle bold format | `Nmfb` |
+| Toggle italic format | `Nmfi` |
+| Toggle strikethrough format  | `Nmfs` |
 
 ### Snippets
 
@@ -254,7 +254,7 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 - [x] Checkbox snippet
 - [x] Format selection in vm
 - [x] Automatic numbering
-- [ ] Toggle formatting
+- [x] Toggle formatting
 - [ ] Render tables
 - [ ] Copy paste images
 - [ ] plantuml?
