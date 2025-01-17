@@ -12,6 +12,7 @@ local api = require("neomark.api")
 ---
 --- @field name string Command name
 --- @field desc string Command description
+--- @field mode string Neovim mode
 --- @field callback function Command callback
 
 --- @type table<neomark.commands.command>
@@ -22,6 +23,7 @@ Commands.commands = {
     interactive_mode_enter = {
         name = 'Nmie',
         desc = 'Enter interactive mode',
+        mode = 'n',
         callback = function(_)
             api.interactive.enter()
         end,
@@ -30,6 +32,7 @@ Commands.commands = {
     interactive_mode_exit = {
         name = 'Nmix',
         desc = 'Exit interactive mode',
+        mode = 'n',
         callback = function(_)
             api.interactive.exit()
         end,
@@ -38,6 +41,7 @@ Commands.commands = {
     forward = {
         name = 'Nmif',
         desc = 'Next interactive element',
+        mode = 'n',
         callback = function(keymap)
             api.interactive.move('forward', keymap)
         end,
@@ -46,6 +50,7 @@ Commands.commands = {
     backward = {
         name = 'Nmib',
         desc = 'Previous interactive element',
+        mode = 'n',
         callback = function(keymap)
             api.interactive.move('backward', keymap)
         end,
@@ -54,6 +59,7 @@ Commands.commands = {
     up = {
         name = 'Nmiu',
         desc = 'Next interactive element up a line/lines',
+        mode = 'n',
         callback = function(keymap)
             api.interactive.move('up', keymap)
         end,
@@ -62,6 +68,7 @@ Commands.commands = {
     down = {
         name = 'Nmid',
         desc = 'Next interactive element down a line/lines',
+        mode = 'n',
         callback = function(keymap)
             api.interactive.move('down', keymap)
         end,
@@ -70,10 +77,38 @@ Commands.commands = {
     interact = {
         name = 'Nmii',
         desc = 'Interact with the selected interactive element',
+        mode = 'n',
         callback = function(keymap)
             api.interactive.interact(keymap)
         end,
-    }
+    },
+
+    format_bold = {
+        name = 'Nmfb',
+        desc = 'Format selection to bold',
+        mode = 'v',
+        callback = function(_)
+            api.formatting.format(api.formatting.formats.bold)
+        end,
+    },
+
+    format_italic = {
+        name = 'Nmfi',
+        desc = 'Format selection to italic',
+        mode = 'v',
+        callback = function(_)
+            api.formatting.format(api.formatting.formats.italic)
+        end,
+    },
+
+    format_strikethrough = {
+        name = 'Nmfb',
+        desc = 'Format selection to bold',
+        mode = 'v',
+        callback = function(_)
+            api.formatting.format(api.formatting.formats.strikethrough)
+        end,
+    },
 }
 
 --- Create a user command

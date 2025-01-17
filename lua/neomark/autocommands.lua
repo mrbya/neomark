@@ -22,21 +22,30 @@ function Autocommands.load(config)
         end
     })
 
-    -- Clear cursor line and re-render
+    -- Clear Handle cursor movement events
     vim.api.nvim_create_autocmd({ 'CursorMoved' }, {
         pattern = config.filetypes,
         callback = function()
             api.render_cursor()
+            api.update_buffer_len()
         end
     })
 
-    -- Run markdown element rendering
+    -- Run markdown element rendering on text change
     vim.api.nvim_create_autocmd({ 'TextChanged', 'InsertLeave' }, {
         pattern = config.filetypes,
         callback = function()
             if vim.fn.mode() == 'n' or vim.fn.mode() == 'v' then
                 api.render()
             end
+        end,
+    })
+
+    -- Process autocomplete on text change in insert mode
+    vim.api.nvim_create_autocmd({ 'TextChangedI' }, {
+        pattern = config.filetypes,
+        callback = function()
+            api.process_autocomplete()
         end,
     })
 

@@ -103,6 +103,13 @@ function Snippets.load(config)
                 luasnip.text_node(") ")
             })
         })
+
+        luasnip.add_snippets("markdown", {
+            luasnip.snippet("checkbox", {
+                luasnip.text_node("- [ ] "),
+                luasnip.insert_node("")
+            })
+        })
     end
 end
 

@@ -4,7 +4,7 @@ A Neovim plugin for folks who love taking notes in markdown and hate to leave th
 
 ## Motivation
 
-I have been using Obsidian for a while, however, due to some undisclosed circumstances I have lost my taste for it and I have been looking for an (idally terminal based) alternatives that would provide an experience similar to that of Obsidians combined preview/edit mode. Tried both stand-alone tools and neovim plugins for rendering/editing markdown files even the obsidian plugin for nvim. All of them were not even close feature-wise or they have not been working at all (but then again, I'm terrible @ reading docs and writing configs so that could have been on me :sweat_smile:). So being as picky as I am, what choice did I have other than to write a markdown plugin of my own? :sweat_smile:
+I have been using Obsidian for a while, however, due to some undisclosed circumstances I have lost my taste for it and I have been looking for an (ideally terminal based) alternatives that would provide an experience similar to that of Obsidians combined preview/edit mode. Tried both stand-alone tools and neovim plugins for rendering/editing markdown files even the obsidian plugin for nvim. However, none of them were even close feature-wise, or they have not been working at all (but then again, I'm terrible @ reading docs and writing configs so that could have been on me :sweat_smile:). So being as picky as I am, what choice did I have other than to write a markdown plugin of my own? :sweat_smile:
 
 ## Features
 
@@ -14,11 +14,15 @@ I have been using Obsidian for a while, however, due to some undisclosed circums
         - inline formatting: bold, italic, strikethrough 
         - checkboxes: `- [ ]`/`No. [ ]`
         - links: `[Link](url)`
-        - code blockx - both inline and multiline
+        - code blocks - both inline and multiline with syntax highlighting powerred by [Treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
 
 2. Interactive mode - lets you jump between interactive elements like links and checkboxes and interact with them (toggle checkboxes, open links)
 
 3. Snippets with a pick and place telescope window to insert links and images
+
+4. List autocompletion - automatic numbering and insertion for numberred and bullet point lists
+
+5. Format selected text to bold/italic/strikethrough in visual mode
 
 ## Installation
 
@@ -120,11 +124,14 @@ to render Images inline with text you can use [image.nvim](https://github.com/3r
         forward = '<Right>',
         backward = '<Left>',
         up = '<Up>',
-        Down = '<Down>'
+        down = '<Down>',
         interact = '<CR>',
+        format_bold = '<leader>b',
+        format_italic = '<leader>i',
+        format_strikethrough = '<leader>s',
     },
 
-    snippets = true,
+    snippets = false,
 }
 ```
 
@@ -139,6 +146,21 @@ opts = {
     disable = {
         'h1',
         'inline',
+    },
+}
+```
+
+### Automatic numbering/autocompletion configuration
+
+To disable automatic list numbering and bullet point list autocompletion add the elements to be disabled to the `disable` table in your plugin `opts`.
+
+Eg.
+```lua
+opts = {
+    -- Disables autocomplete altogether
+    disable = {
+        'numberred_list',
+        'bullet_point_list',
     },
 }
 ```
@@ -178,6 +200,14 @@ opts = {
 2. Use `<leader>i` to enter interactive mode:
     - Use arrow keys to navigate between interactive elements
     - Use `<CR>` to interact with an element
+3. Format selection in visual mode using:
+
+| Keymap | Command |
+| -------------- | --------------- |
+| `<leader>b` | Format selection to bold |
+| `<leader>i` | Format selection to italic |
+| `<leader>s` | Format selection to strikethrough |
+
 
 ### Commands
 
@@ -192,15 +222,19 @@ Same features can be acccessed using commands:
 | Navigate up | `Nmiu` |
 | Navigate down | `Nmid` |
 | Interact | `Nnii` |
+| Format to bold | `Nmfb` |
+| Format to italic | `Nmfi` |
+| Format to strikethrough | `Nmfs` |
 
 ### Snippets
 
-Pick and place snippets:
+Pick and place snippets and others:
 
 | Snippet | Trigger |
 | -------------- | --------------- |
 | link | `neolink` |
 | image | `neoimg` |
+| checkbox | `checkbox` |
 
 To bring up telescope pick and place window tab out of the snippets `url` node without editing it.
 
@@ -216,7 +250,11 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 
 ## Upcomming features
 
-1. Opening links to markdown file sections (url#header)
-2. Rendering tables
-3. Copy pasting images
-4. plantuml?
+- [x] Opening links to markdown file sections (url#header)
+- [x] Checkbox snippet
+- [x] Format selection in vm
+- [x] Automatic numbering
+- [ ] Toggle formatting
+- [ ] Render tables
+- [ ] Copy paste images
+- [ ] plantuml?
