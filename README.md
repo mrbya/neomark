@@ -228,12 +228,13 @@ Same features can be acccessed using commands:
 
 ### Snippets
 
-Pick and place snippets:
+Pick and place snippets and others:
 
 | Snippet | Trigger |
 | -------------- | --------------- |
 | link | `neolink` |
 | image | `neoimg` |
+| checkbox | `checkbox` |
 
 To bring up telescope pick and place window tab out of the snippets `url` node without editing it.
 
