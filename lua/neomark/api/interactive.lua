@@ -6,7 +6,7 @@ local Interactive = {}
 
 --- @class neomark.api.interactive.state
 ---
---- Tables to store buffer states
+--- Tables to store buffer states for interactive API
 ---
 --- @field current_buffer integer Active buffer index
 --- @field elements table<neomark.api.element | any> Table of buffer-mapped arrays of interactive elements
@@ -20,8 +20,6 @@ Interactive.state = {
     interactive_mode = {}
 }
 
---- Neomark API interactive submodule initialization function
----
 --- (Re)Initializes buffer state on buffer entry
 ---
 function Interactive.init()

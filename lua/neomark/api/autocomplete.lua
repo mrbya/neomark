@@ -3,113 +3,178 @@
 --- Neomark API submodule providing autocomplete for numbered lists and bullet point lists
 local A = {}
 
+--- @class neomark.api.autocomplete.state
+---
+--- Table to store buffer states for autocompletion
+---
+--- @field current_buffer integer Active buffer index
+--- @field buffer_len integer[] Table containing lengths of open buffers
+---
 A.state = {
-    buf_lines = 0
+    current_buffer = 0,
+    buffer_len = {},
 }
 
-local last_lines = 0
-
+--- @enum neomark.api.autocomplete.supported
+---
+--- Supported autocomplete elements
+---
 A.supported = {
-    'bullet_point',
-    'numbered',
+    'bullet_point_list',
+    'numbered_list',
 }
 
-function A.init()
-    A.state.buf_lines = vim.api.nvim_buf_line_count(0);
-end
+--- @class neomark.api.autocomplete.config
+---
+--- Table to hold autocomplete api config
+---
+A.config = {}
 
-A.lists = {
-    types = {
-        bullet_point = 'bullet_point',
-        numbered = 'numbered',
-    },
+--- Function to load neomark autocomplete API
+--- 
+--- @param config neomark.config Neomark config
+---
+function A.load(config)
+    local disable = {}
 
-    completers = {
-        bullet_point = {
-            pattern = '-',
-            value_processor = function(value)
-                return value
-            end
-        },
+    for _, element in ipairs(config.disable) do
+        disable[element] = true
+    end
 
-        numbered = {
-            pattern = '%d+%.',
-            value_processor = function(value)
-                -- return tostring(tonumber(value:find('%d+'))) .. '.'
-                local _, _, num = value:find('%d+')
-                print(value)
-                if (num) then
-                    print(num)
-                else
-                    print('nopeeee!')
-                end
-                return value
-            end
-        }
-    },
-}
-
-function A.complete(line, line_idx, col, completer)
-    local start, stop, prefix, value = line:find('^(%s*)(' .. completer.pattern .. ')%s%S')
-    if start and stop and value then
-        value = completer.value_processor(value)
-        value = prefix .. value .. " "
-        vim.api.nvim_buf_set_text(0, line_idx, col, line_idx, col, { value })
-        vim.api.nvim_win_set_cursor(0, { line_idx + 1, col + value:len() + 1 })
-    else
-        start, stop =line:find('^%s*' .. completer.pattern .. '%s*$')
-        if start and stop then
-            vim.api.nvim_buf_set_lines(0, line_idx - 1, line_idx, false, {})
+    A.config = {}
+    for _, element in ipairs(A.supported) do
+        if not disable[element] then
+            table.insert(A.config, element)
         end
     end
 end
 
+-- (Re)Initializes buffer state on buffer entry
+--
+function A.init()
+    A.state.current_buffer = vim.api.nvim_get_current_buf()
+    A.state.buffer_len[A.state.current_buffer] = vim.api.nvim_buf_line_count(0)
+end
+
+--- Updates active buffer length state
+---
+--- @param len integer Active buffer length
+---
+function A.set_buffer_len(len)
+    A.state.buffer_len[A.state.current_buffer] = len
+end
+
+--- Returns active buffer length
+---
+--- @return integer Active buffer length
+---
+function A.get_buffer_len()
+    return A.state.buffer_len[A.state.current_buffer]
+end
+
+--- @class neomark.api.autocomplete.completer
+---
+--- Autocomplete API class providing autocompletion
+--- for a specific element
+---
+--- @field pattern string List item prefix pattern
+--- @field dynamic boolean Signifies whether the list is dynamic
+--- @field value_processor function value processing callback
+
+--- @type table<string, neomark.api.autocomplete.completer>
+---
+--- Supported element completers
+---
+A.completers = {
+    bullet_point_list = {
+        pattern = '-',
+        dynamic = false,
+        value_processor = function(value)
+            return value
+        end
+    },
+
+    numbered_list = {
+        pattern = '%d+%.',
+        dynamic = true,
+        value_processor = function(value)
+            local _, _, val = value:find('(%d+)')
+            return tostring(val + 1) .. '.'
+        end
+    }
+}
+
+--- Handle autocompletion based on the provided line and completer
+--- 
+--- @param line string Buffer line contents
+--- @param line_idx integer Line index
+--- @param completer neomark.api.autocomplete.completer Element completer
+---
+function A.complete(line, line_idx, completer)
+    local start, stop, prefix, value = line:find('^(%s*)(' .. completer.pattern .. ')%s+%S')
+    if start and stop and value then
+        value = completer.value_processor(value)
+        vim.api.nvim_buf_set_lines(0, line_idx, line_idx + 1, false, { prefix .. value .. " " })
+        vim.api.nvim_win_set_cursor(0, { line_idx + 1, prefix:len() + value:len() + 1 })
+
+        if (not completer.dynamic or line_idx + 1 >= A.get_buffer_len()) then
+            return
+        end
+
+        local tidx = line_idx
+        local tline, item
+        repeat
+            tline = vim.api.nvim_buf_get_lines(0, tidx + 1, tidx + 2, false)[1]
+            if tline then
+                start, stop, item = tline:find('^(%s*' .. completer.pattern .. '%s*)')
+            end
+            if start and stop and item then
+                value = completer.value_processor(value)
+                local newitem = item:gsub(completer.pattern, value, 1)
+                tline = tline:gsub(item, newitem, 1)
+                vim.api.nvim_buf_set_lines(0, tidx + 1, tidx + 2, true, { tline })
+                tidx = tidx + 1
+            end
+        until not tline or not item
+    else
+        start, stop, value = line:find('^%s*(' .. completer.pattern .. ')%s*$')
+        if start and stop and value then
+            vim.api.nvim_buf_set_lines(0, line_idx - 1 , line_idx, false, {})
+
+            if completer.dynamic or line_idx + 1 >= A.get_buffer_len() then
+                local tidx = line_idx
+                local tline, item, tprefix, tsuffix
+                repeat
+                    tline = vim.api.nvim_buf_get_lines(0, tidx, tidx + 1, false)[1]
+                    if tline then
+                        start, stop, item, tprefix, tsuffix = tline:find('^((%s*)' .. completer.pattern .. '(%s*))')
+                    end
+                    if start and stop and item then
+                        local newline = tline:gsub(item, tprefix .. value .. tsuffix, 1)
+                        vim.api.nvim_buf_set_lines(0, tidx, tidx + 1, true, { newline })
+                        value = completer.value_processor(value)
+                        tidx = tidx + 1
+                    end
+                until not item
+            end
+        end
+    end
+end
+
+--- Process autocomplete for the current line
+---
 function A.process_line()
     local cursor = vim.api.nvim_win_get_cursor(0);
     local line_idx = cursor[1] - 1;
-    local col = cursor[2] - 1
 
     if line_idx > 1 then
         local line = vim.api.nvim_buf_get_lines(0, line_idx - 1, line_idx, false)[1]
         if line and line ~= "" then
-            A.complete(
-                line,
-                line_idx,
-                col,
-                A.lists.completers.numbered
-            )
+            for _, completer in pairs(A.config) do
+                A.complete(line, line_idx, A.completers[completer])
+            end
         end
     end
-end
-
-function A.detect_newline()
-    local lines = vim.api.nvim_buf_line_count(0);
-
-    if A.state.buf_lines > lines then
-        A.process_line()
-    end
-
-    A.state.buf_lines = lines
-end
-
-function A.load()
-    print("Loaded autocomplete")
-
-    vim.api.nvim_create_autocmd({ 'BufEnter' }, {
-        pattern = "*.md",
-        callback = function()
-            A.init()
-        end
-    })
-
-
-    vim.api.nvim_create_autocmd({ 'TextChanged', 'TextChangedI' }, {
-        pattern = "*.md",
-        callback = function()
-            A.detect_newline()
-        end
-    })
-
 end
 
 return A

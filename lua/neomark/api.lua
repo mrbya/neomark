@@ -21,18 +21,19 @@ local M = {
 --- @field type neomark.api.rendering.element.types Type of the interactive element
 ---
 
---- Api initialisation function
+--- Api submodule loading function
 ---
 --- @param config neomark.config Neomarks config table
 ---
-function M.init(config)
-    M.rendering.init(config)
-    M.autocomplete.load()
+function M.load_submodules(config)
+    M.rendering.load(config)
+    M.autocomplete.load(config)
 end
 
 --- Function to initialize buffer state
 function M.buffer_init()
     M.interactive.init()
+    M.autocomplete.init()
 end
 
 
@@ -93,10 +94,24 @@ function M.clear()
     M.clear_rendering()
 end
 
+--- Update buffer length for autocomplete
+function M.update_buffer_len()
+    M.autocomplete.set_buffer_len(vim.api.nvim_buf_line_count(0))
+end
+
+--- Handle autocompletion
+function M.process_autocomplete()
+    local len = vim.api.nvim_buf_line_count(0)
+    if len > M.autocomplete.get_buffer_len() then
+        M.autocomplete.process_line()
+    end
+    M.autocomplete.set_buffer_len(len)
+end
+
 --- Load neomark api.
 function M.load(config)
     vim.api.nvim_clear_autocmds({pattern = config.filetypes})
-    M.init(config)
+    M.load_submodules(config)
 end
 
 return M

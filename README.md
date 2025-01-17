@@ -20,6 +20,8 @@ I have been using Obsidian for a while, however, due to some undisclosed circums
 
 3. Snippets with a pick and place telescope window to insert links and images
 
+4. List autocompletion - automatic numbering and insertion for numberred and bullet point lists
+
 ## Installation
 
 Neomark piggybacks off of [Treesitter](https://github.com/nvim-treesitter/nvim-treesitter) markdown parser for link concealment and code block syntax highlighting.
@@ -143,6 +145,21 @@ opts = {
 }
 ```
 
+### Automatic numbering/autocompletion configuration
+
+To disable automatic list numbering and bullet point list autocompletion add the elements to be disabled to the `disable` table in your plugin `opts`.
+
+Eg.
+```lua
+opts = {
+    -- Disables autocomplete altogether
+    disable = {
+        'numberred_list',
+        'bullet_point_list',
+    },
+}
+```
+
 ### Keymap configuration
 
 To configure keymaps proivde the keymaps for specific actions in a `keymaps` table in your plugin config `opts`.
@@ -216,10 +233,10 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 
 ## Upcomming features
 
-~1. Opening links to markdown file sections (url#header)~
-~2. Checkbox snippet~
-1. Toggle bold/itallic/strikethrough in vm
-2. Automatic numbering
-2. Rendering tables
-3. Copy pasting images
-4. plantuml?
+- [x] Opening links to markdown file sections (url#header)
+- [x] Checkbox snippet
+- [ ] Toggle bold/itallic/strikethrough in vm
+- [x] Automatic numbering
+- [ ] Rendering tables
+- [ ] Copy pasting images
+- [ ] plantuml?

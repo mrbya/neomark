@@ -40,11 +40,11 @@ Rendering.element = {
     },
 }
 
---- Neomark API rendering submodule initialization function.
+--- Neomark rendering API submodule initialization function.
 ---
 --- @param config neomark.config Neomark config
 ---
-function Rendering.init(config)
+function Rendering.load(config)
     local disable = {}
 
     for _, element in ipairs(config.disable) do
