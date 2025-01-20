@@ -127,6 +127,8 @@ function Autocomplete.complete(line, line_idx, completer)
             tline = vim.api.nvim_buf_get_lines(0, tidx + 1, tidx + 2, false)[1]
             if tline then
                 start, stop, item = tline:find('^(%s*' .. completer.pattern .. '%s*)')
+            else
+                break
             end
             if start and stop and item then
                 value = completer.value_processor(value)
@@ -148,6 +150,8 @@ function Autocomplete.complete(line, line_idx, completer)
                     tline = vim.api.nvim_buf_get_lines(0, tidx, tidx + 1, false)[1]
                     if tline then
                         start, stop, item, tprefix, tsuffix = tline:find('^((%s*)' .. completer.pattern .. '(%s*))')
+                    else
+                        break
                     end
                     if start and stop and item then
                         local newline = tline:gsub(item, tprefix .. value .. tsuffix, 1)
