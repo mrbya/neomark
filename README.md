@@ -255,6 +255,7 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 - [x] Format selection in vm
 - [x] Automatic numbering
 - [x] Toggle formatting
-- [ ] Render tables
+- [x] Render tables
+- [ ] Table editing mode (insert/delete row/column, navigate between cells, ...)
 - [ ] Copy paste images
 - [ ] plantuml?
