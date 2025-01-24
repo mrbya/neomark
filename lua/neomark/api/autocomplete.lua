@@ -7,11 +7,9 @@ local Autocomplete = {}
 ---
 --- Table to store buffer states for autocompletion
 ---
---- @field current_buffer integer Active buffer index
 --- @field buffer_len integer[] Table containing lengths of open buffers
 ---
-Autocomplete.state = {
-    current_buffer = 0,
+_G.neomark.state.autocomplete = {
     buffer_len = {},
 }
 
@@ -52,8 +50,7 @@ end
 -- (Re)Initializes buffer state on buffer entry
 --
 function Autocomplete.init()
-    Autocomplete.state.current_buffer = vim.api.nvim_get_current_buf()
-    Autocomplete.state.buffer_len[Autocomplete.state.current_buffer] = vim.api.nvim_buf_line_count(0)
+    _G.neomark.state.autocomplete.buffer_len[_G.neomark.state.current_buffer] = vim.api.nvim_buf_line_count(0)
 end
 
 --- Updates active buffer length state
@@ -61,7 +58,7 @@ end
 --- @param len integer Active buffer length
 ---
 function Autocomplete.set_buffer_len(len)
-    Autocomplete.state.buffer_len[Autocomplete.state.current_buffer] = len
+    _G.neomark.state.autocomplete.buffer_len[_G.neomark.state.current_buffer] = len
 end
 
 --- Returns active buffer length
@@ -69,7 +66,7 @@ end
 --- @return integer Active buffer length
 ---
 function Autocomplete.get_buffer_len()
-    return Autocomplete.state.buffer_len[Autocomplete.state.current_buffer]
+    return _G.neomark.state.autocomplete.buffer_len[_G.neomark.state.current_buffer]
 end
 
 --- @class neomark.api.autocomplete.completer

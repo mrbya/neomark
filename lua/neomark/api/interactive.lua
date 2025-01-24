@@ -8,13 +8,11 @@ local Interactive = {}
 ---
 --- Tables to store buffer states for interactive API
 ---
---- @field current_buffer integer Active buffer index
 --- @field elements table<neomark.api.element | any> Table of buffer-mapped arrays of interactive elements
 --- @field current_element integer[] Table of buffer-mapped interac element indicies
 --- @field interactive_mode boolean[] Table of buffer-mapped interactive mode states
 ---
-Interactive.state = {
-    current_buffer = 0,
+_G.neomark.state.interactive = {
     elements = {},
     current_element = {},
     interactive_mode = {}
@@ -23,10 +21,9 @@ Interactive.state = {
 --- (Re)Initializes buffer state on buffer entry
 ---
 function Interactive.init()
-    Interactive.state.current_buffer = vim.api.nvim_get_current_buf()
-    Interactive.state.elements[Interactive.state.current_buffer] = Interactive.state.elements[Interactive.state.current_buffer] or {}
-    Interactive.state.current_element[Interactive.state.current_buffer] = Interactive.state.current_element[Interactive.state.current_buffer] or 0
-    Interactive.state.interactive_mode[Interactive.state.current_buffer] = Interactive.state.interactive_mode[Interactive.state.current_buffer] or false
+    _G.neomark.state.interactive.elements[_G.neomark.state.current_buffer] = _G.neomark.state.interactive.elements[_G.neomark.state.current_buffer] or {}
+    _G.neomark.state.interactive.current_element[_G.neomark.state.current_buffer] = _G.neomark.state.interactive.current_element[_G.neomark.state.current_buffer] or 0
+    _G.neomark.state.interactive.interactive_mode[_G.neomark.state.current_buffer] = _G.neomark.state.interactive.interactive_mode[_G.neomark.state.current_buffer] or false
 end
 
 --- Set interactive mode state of the current buffer
@@ -34,7 +31,7 @@ end
 --- @param mode boolean Interactive mode setting
 ---
 function Interactive.set_interactive_mode(mode)
-    Interactive.state.interactive_mode[Interactive.state.current_buffer] = mode
+    _G.neomark.state.interactive.interactive_mode[_G.neomark.state.current_buffer] = mode
 end
 
 --- Retrieve interactive mode state of the active buffer
@@ -42,7 +39,7 @@ end
 --- @return boolean Interactive mode state of the active buffer
 ---
 function Interactive.get_interactive_mode()
-    return Interactive.state.interactive_mode[Interactive.state.current_buffer] or false
+    return _G.neomark.state.interactive.interactive_mode[_G.neomark.state.current_buffer] or false
 end
 
 --- Retrieve array of interactive elements of the active buffer
@@ -50,12 +47,12 @@ end
 --- @return neomark.api.element[] array of interactive elements in the active buffer
 ---
 function Interactive.get_elements()
-    return Interactive.state.elements[Interactive.state.current_buffer]
+    return _G.neomark.state.interactive.elements[_G.neomark.state.current_buffer]
 end
 
 --- Clear interactive elements array of the active buffer
 function Interactive.clear()
-    Interactive.state.elements[Interactive.state.current_buffer] = {}
+    _G.neomark.state.interactive.elements[_G.neomark.state.current_buffer] = {}
 end
 
 --- Add an interactive element to the state of the active buffer
@@ -63,8 +60,8 @@ end
 --- @param element neomark.api.element Element to be added
 ---
 function Interactive.add_element(element)
-    Interactive.state.elements[Interactive.state.current_buffer] = Interactive.state.elements[Interactive.state.current_buffer] or {}
-    table.insert(Interactive.state.elements[Interactive.state.current_buffer], element)
+    _G.neomark.state.interactive.elements[_G.neomark.state.current_buffer] = _G.neomark.state.interactive.elements[_G.neomark.state.current_buffer] or {}
+    table.insert(_G.neomark.state.interactive.elements[_G.neomark.state.current_buffer], element)
 end
 
 --- Get current element index of the active buffer.
@@ -72,7 +69,7 @@ end
 --- @return integer Index of the vurrent element
 ---
 function Interactive.get_current_element_idx()
-    return Interactive.state.current_element[Interactive.state.current_buffer]
+    return _G.neomark.state.interactive.current_element[_G.neomark.state.current_buffer]
 end
 
 --- Set current element index of the active buffer
@@ -80,7 +77,7 @@ end
 --- @param idx integer Current element index to be set
 ---
 function Interactive.set_current_element_idx(idx)
-    Interactive.state.current_element[Interactive.state.current_buffer] = idx
+    _G.neomark.state.interactive.current_element[_G.neomark.state.current_buffer] = idx
 end
 
 --- Find and return interactive element closest to the cursor in the active buffer

@@ -1,3 +1,8 @@
+--- Global plugin state init
+_G.neomark = {
+    state = {},
+}
+
 --- @module "neomark"
 ---
 --- Entry point of the plugin

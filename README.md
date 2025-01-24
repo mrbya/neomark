@@ -261,6 +261,6 @@ To bring up telescope pick and place window tab out of the snippets `url` node w
 - [x] Automatic numbering
 - [x] Toggle formatting
 - [x] Render tables
-- [ ] Table editing mode (insert/delete row/column, navigate between cells, ...)
+- [ ] Table editing (insert/delete row/column, ...)
 - [ ] Copy paste images
 - [ ] plantuml?

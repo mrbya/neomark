@@ -33,6 +33,7 @@ end
 
 --- Function to initialize buffer state
 function Api.buffer_init()
+    _G.neomark.state.current_buffer = vim.api.nvim_get_current_buf()
     Api.interactive.init()
     Api.autocomplete.init()
     Api.rendering.init()

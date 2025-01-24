@@ -47,6 +47,7 @@ Rendering.element = {
 ---
 --- @field start integer Table start line index
 --- @field stop integer Table end line index
+--- @field offset integer Table offset
 --- @field max table<integer> Array containing the maximum value legth table columns
 --- @field columns table<table<string>> Array of Table line values split into columns
 
@@ -54,11 +55,10 @@ Rendering.element = {
 ---
 --- Table to store buffer states for rendering API
 ---
---- @field current_buffer integer Active buffer index
 --- @field tables table<neomark.api.rendering.table> Array of md tables present in buffer
 --- @field is_table boolean Helper variable for md table lookup
 --- @field current_table neomark.api.rendering.table | {} Variable holding table info during table lookup
-Rendering.state = {
+_G.neomark.state.rendering = {
     current_buffer = 0,
     tables = {},
     is_table = false,
@@ -91,8 +91,7 @@ end
 --- (Re)Initialises buffer state on buffer entry
 ---
 function Rendering.init()
-    Rendering.state.current_buffer = vim.api.nvim_get_current_buf()
-    Rendering.state.tables[Rendering.state.current_buffer] = Rendering.state.tables[Rendering.state.current_buffer] or {}
+    _G.neomark.state.rendering.tables[_G.neomark.state.current_buffer] = _G.neomark.state.rendering.tables[_G.neomark.state.current_buffer] or {}
 end
 
 --- Returns current buffer state tables array
@@ -100,7 +99,7 @@ end
 --- @return table<neomark.api.rendering.table> Array tables
 ---
 function Rendering.get_tables()
-    return Rendering.state.tables[Rendering.state.current_buffer]
+    return _G.neomark.state.rendering.tables[_G.neomark.state.current_buffer]
 end
 
 --- Adds a table into the current buffer state tables array
@@ -114,7 +113,7 @@ end
 --- Clears current buffer state tabless array
 ---
 function Rendering.clear_tables()
-    Rendering.state.tables[Rendering.state.current_buffer] = {}
+    _G.neomark.state.rendering.tables[_G.neomark.state.current_buffer] = {}
 end
 
 --- Retrieve namespace id
@@ -132,6 +131,7 @@ function Rendering.clear()
     for _, id in pairs(Rendering.namespaces) do
         vim.api.nvim_buf_clear_namespace(0, id, 0, -1)
     end
+    Rendering.clear_tables()
 end
 
 --- Clear rendering of a specific line of the buffer
@@ -363,18 +363,20 @@ end
 ---
 function Rendering.find_tables(i, line)
     local separators = 0;
-    Rendering.state.current_table = Rendering.state.current_table or {}
+    _G.neomark.state.rendering.current_table = _G.neomark.state.rendering.current_table or {}
 
     for _ in line:gmatch('|') do
         separators = separators + 1
     end
 
     if separators > 1 then
-        if not Rendering.state.is_table then
-            Rendering.state.current_table.start = i - 1
+        if not _G.neomark.state.rendering.is_table then
+            _G.neomark.state.rendering.current_table.start = i - 1
+            local offset = line:find('|')
+            _G.neomark.state.rendering.current_table.offset = offset - 1
         end
 
-        Rendering.state.is_table = true
+        _G.neomark.state.rendering.is_table = true
 
         local pattern = '|(.-'
         for _ = 2, separators - 1 do
@@ -387,15 +389,15 @@ function Rendering.find_tables(i, line)
         table.remove(columns, #columns)
         table.remove(columns, #columns)
 
-        Rendering.recalculate_column_lens(Rendering.state.current_table, columns)
+        Rendering.recalculate_column_lens(_G.neomark.state.rendering.current_table, columns)
     else
-        Rendering.state.is_table = false
-        if Rendering.state.current_table ~= {} and Rendering.state.current_table.start then
-            Rendering.state.current_table.stop = i - 2
-            Rendering.add_table(Rendering.state.current_table)
+        _G.neomark.state.rendering.is_table = false
+        if _G.neomark.state.rendering.current_table ~= {} and _G.neomark.state.rendering.current_table.start then
+            _G.neomark.state.rendering.current_table.stop = i - 2
+            Rendering.add_table(_G.neomark.state.rendering.current_table)
         end
 
-        Rendering.state.current_table = {}
+        _G.neomark.state.rendering.current_table = {}
     end
 end
 
@@ -438,6 +440,7 @@ local piping = {
 function Rendering.render_table(tab)
     local top = piping.corners.top_left
     local bottom = piping.corners.bottom_left
+    local offset = tab.offset
     local line_len = 0
     for _, len in ipairs(tab.max) do
         line_len = line_len + len + 1
@@ -459,6 +462,11 @@ function Rendering.render_table(tab)
         end
     end
 
+    for _ = 1, offset do
+        top = ' ' .. top
+        bottom = ' ' .. bottom
+    end
+
     vim.api.nvim_buf_set_extmark(0, Rendering.get_namespace_id('table'), tab.start, 0, {
         virt_lines = { { { top } } },
         virt_lines_above = true,
@@ -470,7 +478,7 @@ function Rendering.render_table(tab)
     })
 
     for line_idx, columns in ipairs(tab.columns) do
-        local start = 1
+        local start = offset + 1
         local stop = start
 
         local lpipe = piping.edges.left
@@ -484,29 +492,29 @@ function Rendering.render_table(tab)
             padding = piping.padding.edge
         end
 
-        vim.api.nvim_buf_set_extmark(0, Rendering.get_namespace_id('table'), tab.start + line_idx - 1, 0, {
+        vim.api.nvim_buf_set_extmark(0, Rendering.get_namespace_id('table'), tab.start + line_idx - 1, offset, {
             virt_text = { { lpipe } },
             virt_text_pos = 'inline',
-            end_col = 1,
+            end_col = offset + 1,
             conceal = '',
             priority = 1,
         })
 
-        local offset = 0
+        local extra_offset = 0
         for idx, value in ipairs(columns) do
             if (line_idx == 2) then
                 local extra_padding = ''
                 for _ = 1, value:len() do
                     extra_padding = extra_padding .. padding
                 end
-                vim.api.nvim_buf_set_extmark(0, Rendering.get_namespace_id('table'), tab.start + line_idx - 1, stop + offset, {
+                vim.api.nvim_buf_set_extmark(0, Rendering.get_namespace_id('table'), tab.start + line_idx - 1, stop + extra_offset, {
                     virt_text = { { extra_padding } },
                     virt_text_pos = 'overlay',
-                    end_col = stop + offset,
+                    end_col = stop + extra_offset,
                     conceal = '',
                     priority = 1,
                 })
-                offset = 1
+                extra_offset = 1
             end
 
             stop = start + value:len()
@@ -563,7 +571,6 @@ function Rendering.render_tables()
     for _, tab in ipairs(Rendering.get_tables()) do
         Rendering.render_table(tab)
     end
-    Rendering.clear_tables()
 end
 
 --- Render a specific line of the active buffer.
