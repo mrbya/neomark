@@ -15,6 +15,10 @@ I have been using Obsidian for a while, however, due to some undisclosed circums
         - checkboxes: `- [ ]`/`No. [ ]`
         - links: `[Link](url)`
         - code blocks - both inline and multiline with syntax highlighting powerred by [Treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
+        - tables:
+            | h1 | h2 |
+            |----|----|
+            | val1 | val2 |
 
 2. Interactive mode - lets you jump between interactive elements like links and checkboxes and interact with them (toggle checkboxes, open links)
 
@@ -142,9 +146,10 @@ To disable rendering of a specific element provide a `disable` table in your plu
 Eg.
 ```lua
 opts = {
-    -- Disables H1 headers and inline formatting
+    -- Disables H1 headers, tables and inline formatting
     disable = {
         'h1',
+        'tables',
         'inline',
     },
 }
