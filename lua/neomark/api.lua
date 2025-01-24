@@ -8,7 +8,6 @@ local Api = {
     interactive  = require('neomark.api.interactive'),
     autocomplete = require('neomark.api.autocomplete'),
     formatting   = require('neomark.api.formatting'),
-    -- tables       = require('neomark.api.tables'),
 }
 
 --- @class neomark.api.element
@@ -30,7 +29,6 @@ local Api = {
 function Api.load_submodules(config)
     Api.rendering.load(config)
     Api.autocomplete.load(config)
-    -- Api.tables.load()
 end
 
 --- Function to initialize buffer state
